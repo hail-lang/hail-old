@@ -1,0 +1,5 @@
+import { println } from std_io
+
+main :: routine() {
+    println("Hello, world!")
+}

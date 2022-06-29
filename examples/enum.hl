@@ -1,0 +1,26 @@
+import { println } from std_io
+
+MyEnum :: enum {
+    /// A plain enum item.
+    PlainItem,
+
+    /// A struct enum item.
+    StructItem <- struct {
+        item1 <- uint32,
+    },
+}
+
+main :: routine() {
+    val struct_ = MyEnum::StructItem::{
+        item1: 42,
+    }
+    
+    test struct_ {
+        _: MyEnum::PlainItem => {
+            println(0) // => 0
+        },
+        item: MyEnum::StructItem => {
+            println(item.item1) // => 42
+        }
+    } // => 42
+}
