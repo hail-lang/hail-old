@@ -48,10 +48,20 @@ pub enum InstNode<'a> {
     Float(Float<'a>),
 
     /// An access node.
-    AccessNode(AccessNode<'a>),
+    AccessExpr(AccessExpr<'a>),
 
     /// A string node.
     Str(Str<'a>),
+}
+
+/// An access node.
+#[derive(Clone, Debug, PartialEq)]
+pub enum AccessNode<'a> {
+    /// An identifier node.
+    Iden(Iden<'a>),
+
+    /// A static access.
+    Static(Node<Box<AccessNode<'a>>>, Iden<'a>),
 }
 
 /// An access expression as a node.
@@ -62,7 +72,7 @@ pub enum InstNode<'a> {
 /// item.item2
 /// ```
 #[derive(Clone, Debug, PartialEq)]
-pub enum AccessNode<'a> {
+pub enum AccessExpr<'a> {
     /// An identifier node.
     Iden(Iden<'a>),
 
@@ -71,7 +81,7 @@ pub enum AccessNode<'a> {
     /// ```hail
     /// item::item2
     /// ```
-    Static(Node<Box<AccessNode<'a>>>, Iden<'a>),
+    Static(Node<Box<AccessExpr<'a>>>, Iden<'a>),
     
     /// A struct constructor.
     /// 
@@ -80,17 +90,17 @@ pub enum AccessNode<'a> {
     ///     // ....
     /// }
     /// ```
-    Struct(Node<Box<AccessNode<'a>>>, Vec<Node<StructNodeProp<'a>>>),
+    Struct(Node<Box<AccessExpr<'a>>>, Vec<Node<StructNodeProp<'a>>>),
 
     /// A property access.
     /// 
     /// ```hail
     /// item.item2
     /// ```
-    Property(Node<Box<AccessNode<'a>>>, Iden<'a>),
+    Property(Node<Box<AccessExpr<'a>>>, Iden<'a>),
 
     /// A generic type expression.
-    Generic(Node<Box<AccessNode<'a>>>, Vec<Node<TypeExpr<'a>>>),
+    Generic(Node<Box<AccessExpr<'a>>>, Vec<Node<TypeExpr<'a>>>),
 }
 
 /// The struct node property.
@@ -302,11 +312,27 @@ pub struct StructProp<'a> {
     pub ty: Node<TypeExpr<'a>>,
 }
 
-/// The module to import.
+/// The kind of an import.
+#[derive(Clone, Debug, PartialEq)]
+pub enum ImportKind<'a> {
+    /// Importing a whole module.
+    Module,
+
+    /// Specific items,
+    Specific(Vec<Node<AccessNode<'a>>>),
+
+    /// Imports all module items as a certain alias.
+    AllAs(Node<Iden<'a>>),
+}
+
+/// An import statement.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Import<'a> {
     /// The name of the imported module.
     pub module: Node<Iden<'a>>,
+
+    /// The kind of import this statement matches.
+    pub kind: ImportKind<'a>,
 }
 
 /// A declaration.

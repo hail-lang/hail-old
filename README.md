@@ -27,7 +27,7 @@ Hail is a memory & type safe systems programming language.
 import { println } from stdio
 
 main :: routine() {
-    "Hello, world!" stdio::println
+    "Hello, world!" println
 }
 ```
 

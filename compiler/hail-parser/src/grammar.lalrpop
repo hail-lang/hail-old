@@ -32,7 +32,20 @@ pub Decl: Decl<'input> = {
 // import { item } from module
 // or
 // import * as module from module
-Import: Import<'input> = "import" <module:Node<Iden>> => Import { module };
+Import: Import<'input> = {
+    "import" <module:Node<Iden>> => Import {
+        kind: ImportKind::Module,
+        module
+    },
+    "import" "{" <items:List<Node<AccessNode>>> "}" "from" <module:Node<Iden>> => Import {
+        kind: ImportKind::Specific(items),
+        module,
+    },
+    "import" "*" "as" <moduleas:Node<Iden>> "from" <module:Node<Iden>> => Import {
+        kind: ImportKind::AllAs(moduleas),
+        module,
+    },
+}
 
 Enum: Enum<'input> = "enum" <generics:("<" <List<Node<TypeDecl>>> ">")?> "{" <props:List<Node<EnumMember>>> "}" => Enum {
     generics,
@@ -153,7 +166,7 @@ pub NodeOrNodes: NodeOrNodes<'input> = {
 };
 
 InstNode: InstNode<'input> = {
-    <node:AccessNode> => InstNode::AccessNode(node),
+    <node:AccessExpr> => InstNode::AccessExpr(node),
     <node:Int> => InstNode::Int(node),
     <node:Float> => InstNode::Float(node),
     <node:Str> => InstNode::Str(node),
@@ -165,12 +178,17 @@ StructNodeProp: StructNodeProp<'input> =
         value,
     };
 
+AccessExpr: AccessExpr<'input> = {
+    <iden:Iden> => AccessExpr::Iden(iden),
+    <access:Node<Box<AccessExpr>>> "::" <iden:Iden> => AccessExpr::Static(access, iden),
+    <access:Node<Box<AccessExpr>>> "::" "{" <props:List<Node<StructNodeProp>>> "}" => AccessExpr::Struct(access, props),
+    <access:Node<Box<AccessExpr>>> "::" "<" <props:List<Node<TypeExpr>>> ">" => AccessExpr::Generic(access, props),
+    <access:Node<Box<AccessExpr>>> "." <iden:Iden> => AccessExpr::Property(access, iden),
+};
+
 AccessNode: AccessNode<'input> = {
     <iden:Iden> => AccessNode::Iden(iden),
     <access:Node<Box<AccessNode>>> "::" <iden:Iden> => AccessNode::Static(access, iden),
-    <access:Node<Box<AccessNode>>> "::" "{" <props:List<Node<StructNodeProp>>> "}" => AccessNode::Struct(access, props),
-    <access:Node<Box<AccessNode>>> "::" "<" <props:List<Node<TypeExpr>>> ">" => AccessNode::Generic(access, props),
-    <access:Node<Box<AccessNode>>> "." <iden:Iden> => AccessNode::Property(access, iden),
 };
 
 Int: Int<'input> = <value:r"[0-9]"> => Int { value };
