@@ -11,7 +11,7 @@
 - [Notable Features](#notable-features)
 
 ## About
-Hail is a memory & type safe systems programming language.
+Hail is a memory & type safe systems programming language.  It's also stack-oriented ;)
 
 ### Inspiration
 - C/C++: low-level & fast, syntax.
