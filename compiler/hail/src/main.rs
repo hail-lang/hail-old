@@ -1,6 +1,6 @@
 use hail_opt::{LyOpt, LyOptError};
 use hail_diagnostic::{Diag, DiagEmitter, Label};
-use hail_parser::asi::{Tokenize};
+use hail_parser::grammar::DeclsParser;
 
 fn main() {
     let opts = match LyOpt::parse() {
@@ -23,6 +23,13 @@ fn main() {
                         .with_code("E0006(cli)")
                         .with_labels(vec![label, label2])
                         .with_message("multiple inputs.")
+                },
+                LyOptError::InvalidOptionArgs(opt) => {
+                    let label = Label::new(format!("Invalid arguments for option '{}'", opt));
+                    Diag::error()
+                        .with_code("E0008(cli)")
+                        .with_labels(vec![label])
+                        .with_message("invalid arguments for option.")
                 }
             };
 
@@ -31,6 +38,8 @@ fn main() {
             return;
         }
     };
+
+    let mut emitter = DiagEmitter::new(false, opts.input.as_str(), "");
 
     let source = match std::fs::read_to_string(opts.input.clone()) {
         Ok(source) => source,
@@ -41,32 +50,13 @@ fn main() {
                 .with_code("E0007(cli)")
                 .with_labels(vec![label])
                 .with_message("unable to open input file.");
-            
-                let mut emitter = DiagEmitter::new(false, "n/a", "");
+
             emitter.emit(diag).unwrap();
             return;
         }
     };
-    
-    let lexer = source.tokenize();
 
-    match lexer {
-        Ok(lexer) => {
-            for item in lexer {
-                match item {
-                    Ok(ok) => { dbg!(ok); },
-                    Err(diag) => {
-                        let mut emitter = DiagEmitter::new(opts.no_color, "./example.hl", &source);
-                        emitter.emit(diag).unwrap();
-                        return;
-                    }
-                }
-            }
-        },
-        Err(diag) => {
-            let mut emitter = DiagEmitter::new(opts.no_color, "./example.hl", &source);
-            emitter.emit(diag).unwrap();
-            return;
-        }
-    }
+    emitter.set_source(&source);
+
+    dbg!(DeclsParser::new().parse(&source).unwrap());
 }

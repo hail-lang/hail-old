@@ -7,6 +7,7 @@ use textwrap::wrap;
 /// The severity of a [`Highlight`] or [`Diag`].
 /// 
 /// Used to determine the color and prefix of a diagnostic/highlight.
+#[derive(Debug, Clone, PartialEq)]
 pub enum Severity {
     Bug,
     Error,
@@ -16,12 +17,14 @@ pub enum Severity {
 }
 
 /// A highlighted piece of information in a diagnostic.
+#[derive(Debug, Clone, PartialEq)]
 pub struct Highlight {
     /// The location to highlight.
     pub loc: Range<usize>,
 }
 
 /// A label in a diagnostic.
+#[derive(Debug, Clone, PartialEq)]
 pub struct Label {
     pub highlight: Option<Highlight>,
 
@@ -49,6 +52,7 @@ impl Label {
 }
 
 /// A diagnostic that occurred during running `hail`.
+#[derive(Debug, Clone, PartialEq)]
 pub struct Diag {
     /// The severity of this diagnostic.
     pub severity: Severity,
@@ -140,6 +144,11 @@ impl DiagEmitter {
             filename: filename.into(),
             source: source.into(),
         }
+    }
+
+    /// Changes the source of this emitter to the source given.
+    pub fn set_source<Str: Into<String>>(&mut self, source: Str) {
+        self.source = source.into();
     }
 
     fn get_color_choice(&self) -> ColorChoice {

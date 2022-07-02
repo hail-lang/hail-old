@@ -1,5 +1,9 @@
 use std::{ops::Range};
 
+use hail_diagnostic::Diag;
+
+pub type Loc = Range<usize>;
+
 /// The spacing between this token and the next.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Space {
@@ -23,7 +27,7 @@ pub struct Comment<'a> {
 
 /// A punctuation token.
 #[derive(Clone, Debug, PartialEq)]
-pub enum Punct {
+pub enum PunctKind {
     Tilde,
     Bang,
     At,
@@ -47,12 +51,37 @@ pub enum Punct {
     Quest,
 }
 
+/// A punctuatiun token.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Punct {
+    /// The location of this token.
+    pub loc: Loc,
+
+    /// The spacing of this token.
+    pub spacing: Space,
+
+    /// The kind of this punctuator.
+    pub kind: PunctKind,
+}
+
 /// A keyword token.
 #[derive(Clone, Debug, PartialEq)]
-pub enum Keyword {
+pub enum KeywordKind {
     Return,
     Break,
     Continue,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Keyword {
+    /// The location of this token.
+    pub loc: Loc,
+
+    /// The spacing of this token.
+    pub spacing: Space,
+
+    /// The kind of this keyword.
+    pub kind: KeywordKind,
 }
 
 /// The kind of a number literal.
@@ -67,6 +96,12 @@ pub enum NumKind {
 /// A number literal.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Num<'a> {
+    /// The location of this token.
+    pub loc: Loc,
+
+    /// The spacing of this token.
+    pub spacing: Space,
+
     /// The kind of number literal.
     pub kind: NumKind,
 
@@ -77,6 +112,12 @@ pub struct Num<'a> {
 /// An identifier literal.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Iden<'a> {
+    /// The location of this token.
+    pub loc: Loc,
+
+    /// The spacing of this token.
+    pub spacing: Space,
+
     /// An identifier literal.
     pub value: &'a str,
 }
@@ -84,6 +125,12 @@ pub struct Iden<'a> {
 /// A string literal.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Str<'a> {
+    /// The location of this token.
+    pub loc: Loc,
+
+    /// The spacing of this token.
+    pub spacing: Space,
+
     /// The value of the string.
     pub value: &'a str,
 }
@@ -91,8 +138,14 @@ pub struct Str<'a> {
 /// A group of tokens.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Group<'a> {
+    /// The location of this token.
+    pub loc: Loc,
+
+    /// The spacing of this token.
+    pub spacing: Space,
+
     /// The tokens in this group.
-    pub tokens: Vec<TokNode<'a>>,
+    pub tokens: Vec<Tok<'a>>,
 }
 
 /// A token type for Hail.
@@ -104,17 +157,4 @@ pub enum Tok<'a> {
     Iden(Iden<'a>),
     Str(Str<'a>),
     Group(Group<'a>),
-}
-
-/// Diagnostic information for a token.
-#[derive(Clone, Debug, PartialEq)]
-pub struct TokNode<'a> {
-    /// The location of this token.
-    pub loc: Range<usize>,
-
-    /// The token that this node wraps.
-    pub node: Tok<'a>,
-
-    /// The space between this token and the next.
-    pub spacing: Space,
 }

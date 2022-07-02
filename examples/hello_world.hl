@@ -1,5 +1,5 @@
-import { println } from std_io
+import stdio
 
 main :: routine() {
-    println("Hello, world!")
+    "Hello, world!" stdio::println
 }

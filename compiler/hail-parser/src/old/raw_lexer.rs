@@ -231,7 +231,7 @@ impl<'a> Lexer<'a> {
                 .highlight(start_idx..self.chars.idx());
             
             let diag = Diag::error()
-                .with_code("E0004(lexer")
+                .with_code("E0004(lexer)")
                 .with_labels(vec![label, label2])
                 .with_message("unclosed string.");
             
@@ -243,6 +243,7 @@ impl<'a> Lexer<'a> {
 
     /// A token group.
     fn lex_group(&mut self) -> Result<TokNode<'a>, Diag> {
+        let start_idx = self.chars.idx();
         let open = self.chars.next().unwrap();
         let close = match open {
             '(' => ')',
@@ -252,7 +253,6 @@ impl<'a> Lexer<'a> {
         };
         let mut ended = false;
         let mut tokens = vec![];
-        let start_idx = self.chars.idx();
         
         while let Some(char) = self.chars.peek() {
             if char == close {
@@ -267,7 +267,7 @@ impl<'a> Lexer<'a> {
 
         if !ended {
             let label = Label::new("This group never closes \
-            Groups start with '(', '{' and '[' must be closed with ')', '}', ']' respectively.")
+            Groups start with '(', '{' and '[' must be closed with ']', '}' and ')' respectively.")
                 .highlight(start_idx..start_idx + 1);
 
             let label2 = Label::new("The group starts there, and as you can see, never closes.")

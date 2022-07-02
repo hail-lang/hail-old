@@ -35,8 +35,8 @@ pub struct AsiCtx<'a> {
     /// The location to insert a semicolon at.
     pub insert_semicolon: Option<Range<usize>>,
 
-    /// The last token found in the lexer.
-    pub last_tok: Option<Tok<'a>>,
+    /// Whether or not the last token can possibly end the expression.
+    pub last_tok_endable: bool,
 
     /// The comments before the next token.
     pub comments: Vec<Comment<'a>>,
@@ -47,7 +47,7 @@ impl<'a> AsiCtx<'a> {
         Self {
             tokens: tokens.into_iter(),
             insert_semicolon: None,
-            last_tok: None,
+            last_tok_endable: false,
             comments: vec![],
         }
     }
@@ -82,21 +82,7 @@ impl<'a> Asi<'a> {
 
     /// Whether or not a semicolon can be inserted safely.
     fn can_insert(ctx: &AsiCtx<'a>) -> bool {
-        if let Some(tok) = &ctx.last_tok {
-            match &tok {
-                Tok::Punct(punct) => return match punct {
-                    Punct::Quest => true,
-                    _ => false,
-                },
-                Tok::Keyword(keyword) => return match keyword {
-                    Keyword::Return | Keyword::Continue | Keyword::Break => true,
-                    _ => false,
-                },
-                _ => return true,
-            }
-        }
-
-        false
+        ctx.last_tok_endable
     }
 
     /// Skips a single skippable token in the lexer, if any.
@@ -139,43 +125,41 @@ impl<'a> Asi<'a> {
     }
 
     /// Converts a token from a raw token to a parser token.
-    fn convert_token(token: raw::TokNode<'a>, ctx: &mut AsiCtx<'a>) -> Result<TokNode<'a>, Diag> {
+    fn convert_token(token: raw::TokNode<'a>, ctx: &mut AsiCtx<'a>) -> Result<Tok<'a>, Diag> {
         match token.node {
             raw::Tok::Punct(raw) => {
-                let punct = match raw.char {
-                    '~' => Punct::Tilde,
-                    '!' => Punct::Bang,
-                    '@' => Punct::At,
-                    '#' => Punct::Hash,
-                    '%' => Punct::Perc,
-                    '^' => Punct::Caret,
-                    '&' => Punct::Amp,
-                    '*' => Punct::Star,
-                    '-' => Punct::Dash,
-                    '=' => Punct::Eq,
-                    '+' => Punct::Plus,
-                    '|' => Punct::Pipe,
-                    ';' => Punct::Semi(false),
-                    ':' => Punct::Colon,
-                    '/' => Punct::Slash,
-                    '.' => Punct::Dot,
-                    ',' => Punct::Comma,
-                    '>' => Punct::Gt,
-                    '<' => Punct::Lt,
-                    '?' => Punct::Quest,
+                let kind = match raw.char {
+                    '~' => PunctKind::Tilde,
+                    '!' => PunctKind::Bang,
+                    '@' => PunctKind::At,
+                    '#' => PunctKind::Hash,
+                    '%' => PunctKind::Perc,
+                    '^' => PunctKind::Caret,
+                    '&' => PunctKind::Amp,
+                    '*' => PunctKind::Star,
+                    '-' => PunctKind::Dash,
+                    '=' => PunctKind::Eq,
+                    '+' => PunctKind::Plus,
+                    '|' => PunctKind::Pipe,
+                    ';' => PunctKind::Semi(false),
+                    ':' => PunctKind::Colon,
+                    '/' => PunctKind::Slash,
+                    '.' => PunctKind::Dot,
+                    ',' => PunctKind::Comma,
+                    '>' => PunctKind::Gt,
+                    '<' => PunctKind::Lt,
+                    '?' => PunctKind::Quest,
                     _ => unreachable!(),
                 };
                 
-                let node = Tok::Punct(punct);
-                ctx.last_tok = Some(node.clone());
-
+                ctx.last_tok_endable = kind == PunctKind::Quest;
                 let spacing = Self::skip_tokens(ctx)?;
 
-                Ok(TokNode {
+                Ok(Tok::Punct(Punct {
                     loc: token.loc,
-                    node,
                     spacing,
-                })
+                    kind,
+                }))
             },
             raw::Tok::Num(num) => {
                 let kind = match num.kind {
@@ -185,33 +169,27 @@ impl<'a> Asi<'a> {
                     raw::NumKind::Float => NumKind::Float,
                 };
 
-                let node = Tok::Num(Num {
+                ctx.last_tok_endable = true;
+                let spacing = Self::skip_tokens(ctx)?;
+
+                Ok(Tok::Num(Num {
+                    loc: token.loc,
+                    spacing,
                     kind,
                     value: num.value,
-                });
-                ctx.last_tok = Some(node.clone());
-
-                let spacing = Self::skip_tokens(ctx)?;
-
-                Ok(TokNode {
-                    loc: token.loc,
-                    node,
-                    spacing,
-                })
+                }))
             },
             raw::Tok::Iden(iden) => {
-                let node = Tok::Iden(Iden {
-                    value: iden.value,
-                });
-                ctx.last_tok = Some(node.clone());
+                
+                ctx.last_tok_endable = true;
 
                 let spacing = Self::skip_tokens(ctx)?;
 
-                Ok(TokNode {
+                Ok(Tok::Iden(Iden {
                     loc: token.loc,
-                    node,
                     spacing,
-                })
+                    value: iden.value,
+                }))
             },
             raw::Tok::Str(str) => {
                 let node = Tok::Str(Str {
@@ -277,6 +255,16 @@ impl<'a> Asi<'a> {
                 unreachable!()
             },
         }
+    }
+
+    pub fn collect_tokens(&mut self) -> Result<Vec<TokNode>, Diag> {
+        let mut tokens = vec![];
+
+        while let Some(tok) = self.next() {
+            tokens.push(tok?);
+        }
+
+        Ok(tokens)
     }
 }
 

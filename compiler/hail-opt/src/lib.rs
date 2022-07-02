@@ -6,6 +6,9 @@ pub struct LyOpt {
     /// The input to parse.
     pub input: String,
 
+    /// The name of the module.
+    pub module_name: Option<String>,
+
     /// Whether or not any colors are allowed to be used on the command line.
     pub no_color: bool,
 }
@@ -17,6 +20,9 @@ pub enum LyOptError {
 
     /// An unrecognized option was found.
     UnrecognizedOption(String),
+
+    /// Invalid arguments for an option.
+    InvalidOptionArgs(String),
 }
 
 impl LyOpt {
@@ -27,11 +33,29 @@ impl LyOpt {
 
         let mut input = None;
         let mut no_color = false;
+        let mut module_name = None;
 
-        for arg in args {
+        // TODO: add module list and -libname opt
+        // Usage: -lib<name> <path>
+
+        loop {
+            let arg = match args.next() {
+                Some(arg) => arg,
+                None => break,
+            };
             if &arg[..1] == "-" {
                 match arg.as_str() {
                     "-no_color" | "-nocolor" => no_color = true,
+                    "-module" | "-m" => {
+                        match args.next() {
+                            Some(module) => {
+                                module_name = Some(module);
+                            },
+                            None => {
+                                return Err(LyOptError::InvalidOptionArgs("-module/-m".into()));
+                            }
+                        };
+                    }
                     "-v" | "-version" => {
                         println!("hail v{}", env!("CARGO_PKG_VERSION"));
                         std::process::exit(0);
@@ -62,6 +86,7 @@ impl LyOpt {
         match input {
             Some(input) => Ok(Self {
                 input,
+                module_name,
                 no_color,
             }),
             None => {
