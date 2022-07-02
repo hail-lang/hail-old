@@ -24,10 +24,10 @@ Hail is a memory & type safe systems programming language.
 
 ## Examples
 ```hail
-import { println } from std_io
+import { println } from stdio
 
 main :: routine() {
-    println("Hello, world!")
+    "Hello, world!" stdio::println
 }
 ```
 
