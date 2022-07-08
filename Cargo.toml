@@ -1,2 +1,6 @@
 [workspace]
-members = []
+members = [
+    "compiler/hailc",
+    "compiler/hailc-diag",
+    "compiler/hailc-loc",
+]
