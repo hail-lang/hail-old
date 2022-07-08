@@ -1,5 +1,5 @@
 import { println } from stdio
 
 main :: routine() {
-    "Hello, world!" println
+    println("Hello, world!")
 }

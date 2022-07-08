@@ -1,44 +1,23 @@
 <p align="center">
-    <img src="logo.svg" width="50%">
-    <p align="center"><i>A low-level programming language with high-level features (and a cheesy logo)!</i><p>
+    <img src="logo.svg" width="75%">
+    <p align="center" style="font-style: italic;">A type-safe, multi-paradigm, high-speed general purpose programming language.</p>
 </p>
 
-## Table of Contents
-- [About](#about)
-    - [Inspiration](#inspiration)
-    - [Disclaimer](#disclaimer)
-- [Examples](#examples)
-- [Notable Features](#notable-features)
+> _**note:**_ i'm currently still working on the language design and semantics, which is why i restarted the project.  i didn't make much progress at first and i implemented it with a parser generator, which doesn't give me as much control as i like.  this is the last time i restart the project without warning.
 
-## About
-Hail is a memory & type safe systems programming language.  It's also stack-oriented ;)
+# Table of Contents
+- [Table of Contents](#table-of-contents)
+- [The Language](#the-language)
+- [Goals](#goals)
 
-### Inspiration
-- C/C++: low-level & fast, syntax.
-- JavaScript: import syntax.
-- Odin & Jai: syntax.
-- Rust: safety, enums.
+# The Language
+Hail is a low-level, type safe programming language.  By default, Hail doesn't manage memory.
 
-### Disclaimer
-> **note**: Hail as a language and compiler is VERY unfinished.  Everything is subject to *breaking change*.  Syntax, semantics, standard libraries, everything.  The features listed here and in the [Features](#features) section may not be in the final product of the language, and the [examples](https://github.com/hail-lang/hail/tree/main/examples) may not work in later versions of the language.
+It's designed to compete with other lower-level languages, such as C/C++, Jai, Odin, Rust and Zig.
 
-## Examples
-```hail
-import { println } from stdio
+# Goals
+These are the goals which I intend to reach at one point with Hail.
 
-main :: routine() {
-    "Hello, world!" println
-}
-```
-
-If you want to see some more examples of Hail programs, check the [examples folder](https://github.com/hail-lang/hail/tree/main/examples).
-
-## Notable Features
-> Please see the above [disclaimer](#disclaimer).
-
-- *Cool syntax*.
-- Algebraic data types, like Rust enums.
-- Generic types.
-- Memory managed at compile time.
-- Optional semicolons (finally, an actually decent compiled language with optional semicolons)!
-- Values are immutable by default.
+- Compile applications "blazingly fast," without sacrificing stability or efficiency of the application.
+- Generate small, portable executables.
+- Be simple enough that a single person can know the entire language syntax & semantics by memory (excluding the standard libraries, as documentation will always be readily available for those).

@@ -1,8 +1,0 @@
-[workspace]
-members = [
-    "compiler/hail",
-    "compiler/hail-diagnostic",
-    "compiler/hail-opt",
-    "compiler/hail-parser",
-    "compiler/hail-shared",
-]
