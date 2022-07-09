@@ -1,9 +1,9 @@
 <p align="center">
     <img src="logo.svg" width="75%">
-    <p align="center" style="font-style: italic;">A type-safe, multi-paradigm, high-speed general purpose programming language.</p>
+    <p align="center" style="font-style: italic;">A type-safe, high speed programming language for scalable systems!  (featuring a cheesy logo!)</p>
 </p>
 
-> _**note:**_ i'm currently still working on the language design and semantics, which is why i restarted the project.  i didn't make much progress at first and i implemented it with a parser generator, which doesn't give me as much control as i like.  this is the last time i restart the project without warning.
+> _**note:**_ the compiler is unfinished and probably buggy.  if it accidentally deletes your Win32 folder i am not responsible :)  happy hacking
 
 # Table of Contents
 - [Table of Contents](#table-of-contents)
@@ -11,7 +11,7 @@
 - [Goals](#goals)
 
 # The Language
-Hail is a low-level, type safe programming language.  By default, Hail doesn't manage memory.
+Hail is a low-level, type-safe programming language.  By default, Hail doesn't manage memory.
 
 It's designed to compete with other lower-level languages, such as C/C++, Jai, Odin, Rust and Zig.
 
