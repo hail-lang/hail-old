@@ -56,6 +56,10 @@ impl DiagDriver for CodespanDriver {
             SimpleFile::new("", "")
         };
 
+        for note in diag.notes() {
+            codespan_diag.notes.push(note.to_string());
+        }
+
         let mut output = match diag.level() {
             ErrLevel::Bug | ErrLevel::Err => StandardStream::stderr(self.choice),
             _ => StandardStream::stdout(self.choice),

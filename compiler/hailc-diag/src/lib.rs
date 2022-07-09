@@ -51,12 +51,15 @@ pub struct Diag<'a> {
 
     /// The message of the diagnostic.
     msg: Option<&'a str>,
+
+    /// The notes in this diagnostic.
+    notes: Vec<&'a str>,
 }
 
 impl<'a> Diag<'a> {
     /// Creates a new, empty diagnostic with the provided [`ErrLevel`].
     pub fn new(level: ErrLevel) -> Self {
-        Self { level, code: None, highlight: None, msg: None }
+        Self { level, code: None, highlight: None, msg: None, notes: vec![] }
     }
 
     /// Returns the level of this diagnostic.
@@ -94,6 +97,23 @@ impl<'a> Diag<'a> {
     /// Makes this diagnostic highlight the provided location.
     pub fn with_highlight(mut self, loc: Loc<'a>) -> Self {
         self.highlight = Some(loc);
+        self
+    }
+
+    /// Returns the notes in this diagnostic.
+    pub fn notes(&self) -> &Vec<&'a str> {
+        &self.notes
+    }
+
+    /// Returns this diagnostic, with the provided note inserted.
+    pub fn with_note(mut self, note: &'a str) -> Self {
+        self.notes.push(note);
+        self
+    }
+
+    /// Returns this diagnostic, with the provided notes.  Overwrites any previously inserted notes.
+    pub fn with_notes(mut self, notes: Vec<&'a str>) -> Self {
+        self.notes = notes;
         self
     }
 }
