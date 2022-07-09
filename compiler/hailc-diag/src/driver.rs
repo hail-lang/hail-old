@@ -1,4 +1,6 @@
-use crate::{Diag, builder::FileRegistry};
+use crate::{Diag};
+
+use hailc_loc::files::FileRegistry;
 
 /// A driver for emitting diagnostics to the terminal.
 pub trait DiagDriver {

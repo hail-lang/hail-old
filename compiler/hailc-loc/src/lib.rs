@@ -1,8 +1,12 @@
 //! Debugging locations in Hail source code.
 
+pub mod files;
+
 use std::marker::PhantomData;
 use std::fmt::Debug;
 use std::ops::Range;
+
+use files::File;
 
 /// If an object is indexable, it can be referenced to by an [`Idx`].
 /// 
@@ -82,22 +86,12 @@ impl<T: Indexable> Debug for Idx<T> {
     }
 }
 
-/// A type that references the name of a file.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Source;
-
-impl Indexable for Source {
-    fn name() -> String {
-        "Source".to_string()
-    }
-}
-
 /// A location in the source file.
 /// 
 /// [`Loc`]s are usually locations of tokens, AST items or other trees that are used in Hailc.  They are used in diagnostics if something goes
 /// wrong.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Loc {
+pub struct Loc<'a> {
     /// The starting index of the location.
     start: u32,
 
@@ -105,17 +99,17 @@ pub struct Loc {
     end: u32,
 
     /// The name of the file.
-    source: Idx<Source>,
+    source: Idx<File<'a>>,
 }
 
-impl Loc {
+impl<'a> Loc<'a> {
     /// Creates a location from a range of [`u32`]s.
-    pub fn from_u32_range(range: Range<u32>, source: Idx<Source>) -> Self {
+    pub fn from_u32_range(range: Range<u32>, source: Idx<File<'a>>) -> Self {
         Self { start: range.start, end: range.end, source }
     }
 
     /// Creates a location from a range of [`usize`]s.  Less efficient than [`Loc::from_u32_range`].
-    pub fn from_usize_range(range: Range<usize>, source: Idx<Source>) -> Self {
+    pub fn from_usize_range(range: Range<usize>, source: Idx<File<'a>>) -> Self {
         Self { start: range.start as u32, end: range.end as u32, source }
     }
 
@@ -130,7 +124,7 @@ impl Loc {
     }
     
     /// Returns the source file of this location.
-    pub fn source(&self) -> Idx<Source> {
+    pub fn source(&self) -> Idx<File<'a>> {
         self.source
     }
 }

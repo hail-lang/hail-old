@@ -47,7 +47,7 @@ pub struct Diag<'a> {
     code: Option<&'a str>,
 
     /// The highlighted points of this diagnostic.
-    highlight: Option<Loc>,
+    highlight: Option<Loc<'a>>,
 
     /// The message of the diagnostic.
     msg: Option<&'a str>,
@@ -92,7 +92,7 @@ impl<'a> Diag<'a> {
     }
 
     /// Makes this diagnostic highlight the provided location.
-    pub fn with_highlight(mut self, loc: Loc) -> Self {
+    pub fn with_highlight(mut self, loc: Loc<'a>) -> Self {
         self.highlight = Some(loc);
         self
     }

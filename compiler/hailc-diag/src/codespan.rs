@@ -1,9 +1,10 @@
+use crate::{driver::DiagDriver, ErrLevel};
+
 use codespan_reporting::{diagnostic::{Diagnostic, Label, Severity}, files::SimpleFile};
 pub use codespan_reporting::term::{Chars, ColorArg, Config, DisplayStyle, Styles};
 pub use codespan_reporting::term::termcolor::{self, Color, ColorChoice, ColorSpec};
+use hailc_loc::files::FileRegistry;
 use termcolor::StandardStream;
-
-use crate::{driver::DiagDriver, ErrLevel};
 
 /// A driver for emitting diagnostics with `codespan-reporting`.
 #[derive(Clone, Debug)]
@@ -29,7 +30,7 @@ impl Default for CodespanDriver {
 }
 
 impl DiagDriver for CodespanDriver {
-    fn emit(&mut self, diag: &crate::Diag, files: &crate::builder::FileRegistry) {
+    fn emit(&mut self, diag: &crate::Diag, files: &FileRegistry) {
         let mut codespan_diag: Diagnostic<()> = Diagnostic::new(match diag.level() {
             ErrLevel::Bug => Severity::Bug,
             ErrLevel::Err => Severity::Error,
