@@ -5,25 +5,12 @@
 pub mod builder;
 pub mod driver;
 
+#[cfg(feature = "codespan")]
+pub mod codespan;
+
 pub use builder::DiagBuilder;
 
 use hailc_loc::Loc;
-
-/// A highlight in a diagnostic.
-/// 
-/// Highlights, when emitted to the terminal, "highlight" or underline important parts of the source file.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Highlight {
-    /// The location of the highlight.
-    loc: Loc,
-}
-
-impl Highlight {
-    /// Creates a new [`Highlight`] at the provided [`Loc`].
-    pub fn new(loc: Loc) -> Self {
-        Self { loc }
-    }
-}
 
 /// The severity of a diagnostic.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -60,7 +47,7 @@ pub struct Diag<'a> {
     code: Option<&'a str>,
 
     /// The highlighted points of this diagnostic.
-    highlights: Vec<Highlight>,
+    highlight: Option<Loc>,
 
     /// The message of the diagnostic.
     msg: Option<&'a str>,
@@ -69,7 +56,7 @@ pub struct Diag<'a> {
 impl<'a> Diag<'a> {
     /// Creates a new, empty diagnostic with the provided [`ErrLevel`].
     pub fn new(level: ErrLevel) -> Self {
-        Self { level, code: None, highlights: vec![], msg: None }
+        Self { level, code: None, highlight: None, msg: None }
     }
 
     /// Returns the level of this diagnostic.
@@ -99,20 +86,14 @@ impl<'a> Diag<'a> {
         self
     }
 
-    /// Returns the highlights in this diagnostic.
-    pub fn highlights(&self) -> &Vec<Highlight> {
-        &self.highlights
+    /// Returns the highlight of this diagnostic, if any.
+    pub fn highlight(&self) -> Option<Loc> {
+        self.highlight
     }
 
-    /// Returns this diagnostic, with the provided [`Highlight`].
-    pub fn with_highlight(mut self, highlight: Highlight) -> Self {
-        self.highlights.push(highlight);
-        self
-    }
-
-    /// Returns this diagnostic, with the provided [`Highlight`]s.  This will overwrite any previous highlights.
-    pub fn with_highlights(mut self, highlights: Vec<Highlight>) -> Self {
-        self.highlights = highlights;
+    /// Makes this diagnostic highlight the provided location.
+    pub fn with_highlight(mut self, loc: Loc) -> Self {
+        self.highlight = Some(loc);
         self
     }
 }

@@ -5,5 +5,10 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+default = ["codespan"]
+codespan = ["dep:codespan-reporting"]
+
 [dependencies]
 hailc-loc = { path = "../hailc-loc", version = "0.0.0-alpha" }
+codespan-reporting = { version = "0.11.1", optional = true }
