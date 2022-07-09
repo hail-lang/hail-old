@@ -64,3 +64,20 @@ impl<'a> DiagBuilder<'a> {
         }
     }
 }
+
+/// Unwraps a result, or emits the diagnostics from a diagnostic builder.
+pub trait UnwrapOrEmit<T> {
+    fn unwrap_or_emit(self, files: &FileRegistry) -> T;
+}
+
+impl<'a, T> UnwrapOrEmit<T> for Result<T, DiagBuilder<'a>> {
+    fn unwrap_or_emit(self, files: &FileRegistry) -> T {
+        match self {
+            Ok(value) => value,
+            Err(mut e) => {
+                e.emit(files);
+                std::process::exit(1);
+            }
+        }
+    }
+}
