@@ -3,21 +3,22 @@ use crate::{Diag, ErrLevel, driver::DiagDriver};
 use hailc_loc::files::{FileRegistry};
 
 /// A builder for diagnostics.
-pub struct DiagBuilder<'a> {
+#[derive(Clone)]
+pub struct DiagBuilder<'a, Driver: DiagDriver> {
     /// The diagnostics thrown to this [`DiagBuilder`].
     diags: Vec<Diag<'a>>,
 
     /// The driver that emits diagnostics.
-    driver: Box<dyn DiagDriver>,
+    driver: Driver,
 
     /// Whether or not any diagnostics with an error or higher error level have been thrown.
     err: bool,
 }
 
-impl<'a> DiagBuilder<'a> {
+impl<'a, Driver: DiagDriver> DiagBuilder<'a, Driver> {
     /// Creates a new, empty diagnostic builder.
-    pub fn new<Driver: 'static + DiagDriver>(driver: Driver) -> Self {
-        Self { diags: Vec::new(), driver: Box::new(driver), err: false }
+    pub fn new(driver: Driver) -> Self {
+        Self { diags: Vec::new(), driver: driver, err: false }
     }
 
     /// Creates a new [`ErrLevel::Bug`] diagnostic.
@@ -70,7 +71,7 @@ pub trait UnwrapOrEmit<T> {
     fn unwrap_or_emit(self, files: &FileRegistry) -> T;
 }
 
-impl<'a, T> UnwrapOrEmit<T> for Result<T, DiagBuilder<'a>> {
+impl<'a, T, Driver: DiagDriver> UnwrapOrEmit<T> for Result<T, DiagBuilder<'a, Driver>> {
     fn unwrap_or_emit(self, files: &FileRegistry) -> T {
         match self {
             Ok(value) => value,

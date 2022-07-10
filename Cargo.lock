@@ -27,6 +27,12 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 [[package]]
 name = "hailc"
 version = "0.0.0-alpha"
+dependencies = [
+ "hailc-ctx",
+ "hailc-diag",
+ "hailc-lexer",
+ "hailc-loc",
+]
 
 [[package]]
 name = "hailc-ctx"
@@ -49,6 +55,7 @@ name = "hailc-lexer"
 version = "0.0.0-alpha"
 dependencies = [
  "hailc-ctx",
+ "hailc-diag",
  "hailc-loc",
  "logos",
 ]

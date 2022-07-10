@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 hailc-ctx = { path = "../hailc-ctx", version = "0.0.0-alpha" }
+hailc-diag = { path = "../hailc-diag", version = "0.0.0-alpha" }
 hailc-loc = { path = "../hailc-loc", version = "0.0.0-alpha" }
 logos = "0.12.1"

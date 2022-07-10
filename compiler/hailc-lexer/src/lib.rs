@@ -2,10 +2,11 @@
 
 mod raw;
 
-use hailc_ctx::Ctx;
-use hailc_loc::Loc;
 use raw::RawTok;
 
+use hailc_ctx::Ctx;
+use hailc_loc::Loc;
+use hailc_diag::{driver::DiagDriver, DiagBuilder};
 use logos::{Lexer, Logos};
 
 /// A punctuator token.
@@ -121,12 +122,12 @@ pub enum Tok<'a> {
 }
 
 /// An automatic semicolon inserter, which wraps a lexer written with `logos`.
-pub struct Asi<'a> {
+pub struct Asi<'a, Driver: DiagDriver> {
     /// The lexer this automatic semicolon inserter wraps.
     lexer: Lexer<'a, RawTok>,
 
     /// The context for the lexer.
-    ctx: Ctx<'a>,
+    ctx: Ctx<'a, Driver>,
 
     /// If we are currently tokenizing a group (`()` or `[]`).
     /// 
@@ -148,9 +149,9 @@ pub struct Asi<'a> {
     insert: bool,
 }
 
-impl<'a> Asi<'a> {
+impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
     /// Creates a new semicolon inserter.
-    pub fn new(file: &'a str, ctx: Ctx<'a>) -> Self {
+    pub fn new(file: &'a str, ctx: Ctx<'a, Driver>) -> Self {
         Self { lexer: RawTok::lexer(file), ctx, is_group: false, can_insert: false, insert: false }
     }
 
@@ -174,7 +175,7 @@ impl<'a> Asi<'a> {
     }
 
     /// Tokenizes a single group of tokens.
-    fn lex_group(&mut self, close: &str) -> Result<Vec<Tok<'a>>, ()> {
+    fn lex_group(&mut self, close: &str) -> Result<Vec<Tok<'a>>, DiagBuilder<'a, Driver>> {
         let mut tokens = vec![];
         let start = self.lexer.span().start;
         let old_is_group = self.is_group;
@@ -207,7 +208,7 @@ impl<'a> Asi<'a> {
                 
                 builder.throw(diag);
                 builder.throw(diag1);
-                return Err(())
+                return Err(self.ctx.builder().clone())
             }
         }
 
@@ -218,7 +219,7 @@ impl<'a> Asi<'a> {
     }
 
     /// Finds the next token in the lexer.
-    fn next_token(&mut self) -> Result<Option<Tok<'a>>, ()> {
+    fn next_token(&mut self) -> Result<Option<Tok<'a>>, DiagBuilder<'a, Driver>> {
         self.skip_tokens();
 
         if self.insert {
@@ -327,7 +328,7 @@ impl<'a> Asi<'a> {
                             
                             builder.throw(diag);
 
-                            return Err(());
+                            return Err(self.ctx.builder().clone());
                         },
                         "?" => {
                             self.can_insert = true;
@@ -362,7 +363,7 @@ impl<'a> Asi<'a> {
     }
 
     /// Returns all tokens in the source string.
-    pub fn lex(&mut self) -> Result<Vec<Tok<'a>>, ()> {
+    pub fn lex(&mut self) -> Result<Vec<Tok<'a>>, DiagBuilder<'a, Driver>> {
         let mut toks = vec![];
 
         while let Some(tok) = self.next_token()? {
