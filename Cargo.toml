@@ -1,6 +1,8 @@
 [workspace]
 members = [
     "compiler/hailc",
+    "compiler/hailc-ctx",
     "compiler/hailc-diag",
+    "compiler/hailc-lexer",
     "compiler/hailc-loc",
 ]

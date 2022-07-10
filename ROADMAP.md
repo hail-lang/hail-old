@@ -30,12 +30,18 @@ import { MyStruct, my_routine } from lib
 
 ### Syntax
 - Optional semicolons, using automatic semicolon insertion ([#3](https://github.com/hail-lang/hail/issues/3))
+- Math
+- Comments (block comments aren't supported in Hail)
+- Struct field accesses
+- Struct static accesses
+- Function calls
+- Struct construction
 - `val` variables
-```hail
-val my_variable = 42
-val my_variable <- uint32 = 42
-val my_variable <- uint32
-```
+- `if` statements
+- `while` statements
+- `return` statements
+- `break` statements
+- `continue` statements
 
 ## Compiler
 > TODO: list the compiler stuff.

@@ -1,0 +1,10 @@
+[package]
+name = "hailc-ctx"
+version = "0.0.0-alpha"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hailc-diag = { path = "../hailc-diag", version = "0.0.0-alpha" }
+hailc-loc = { path = "../hailc-loc", version = "0.0.0-alpha" }
