@@ -134,6 +134,9 @@ pub struct Asi<'a, Driver: DiagDriver> {
     /// Blocks (`{}`) don't count as token groups.
     is_group: bool,
 
+    /// If we are currently tokenizing a block.
+    is_block: bool,
+
     /// Whether or not it is possible to insert a semicolon after the last token.
     /// 
     /// `can_insert` is true if we can end the statement at the last token, such as an identifier or number.
@@ -152,7 +155,7 @@ pub struct Asi<'a, Driver: DiagDriver> {
 impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
     /// Creates a new semicolon inserter.
     pub fn new(file: &'a str, ctx: Ctx<'a, Driver>) -> Self {
-        Self { lexer: RawTok::lexer(file), ctx, is_group: false, can_insert: false, insert: false }
+        Self { lexer: RawTok::lexer(file), ctx, is_group: false, is_block: false, can_insert: false, insert: false }
     }
 
     /// Skips any skippable tokens.
@@ -160,7 +163,7 @@ impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
         loop {
             if let Some(tok) = self.lexer.clone().next() {
                 if tok == RawTok::LineBreak {
-                    if self.can_insert && !self.is_group {
+                    if self.can_insert && !self.is_group && self.is_block {
                         self.insert = true;
                         return;
                     }
@@ -355,6 +358,8 @@ impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
                         .with_note("i don't know how to process this character!  perhaps it's in a different language?");
 
                     builder.throw(diag);
+
+                    return Err(self.ctx.builder().clone())
                 }
             }
         }
