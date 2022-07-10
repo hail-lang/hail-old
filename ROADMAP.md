@@ -29,7 +29,7 @@ import { MyStruct, my_routine } from lib
 ```
 
 ### Syntax
-- Optional semicolons, using automatic semicolon insertion ([#3](https://github.com/hail-lang/hail/issues/3))
+- Optional semicolons, using automatic semicolon insertion ([testing #3](https://github.com/hail-lang/hail/issues/3))
 - Math
 - Comments (block comments aren't supported in Hail)
 - Struct field accesses
