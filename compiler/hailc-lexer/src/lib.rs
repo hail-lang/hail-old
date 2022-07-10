@@ -360,4 +360,15 @@ impl<'a> Asi<'a> {
 
         Ok(None)
     }
+
+    /// Returns all tokens in the source string.
+    pub fn lex(&mut self) -> Result<Vec<Tok<'a>>, ()> {
+        let mut toks = vec![];
+
+        while let Some(tok) = self.next_token()? {
+            toks.push(tok);
+        }
+
+        Ok(toks)
+    }
 }
