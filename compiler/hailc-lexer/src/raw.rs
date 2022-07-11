@@ -43,7 +43,7 @@ pub enum RawTok {
     /// my_identifier
     /// _ // reserved identifier
     /// ```
-    #[regex("[a-zA-Z_][a-zA-Z0-9]+")]
+    #[regex("[a-zA-Z_$][a-zA-Z_$0-9]+")]
     Id,
     
     /// A string literal.
@@ -51,10 +51,12 @@ pub enum RawTok {
     /// ```hail
     /// "Hello, world!"
     /// ```
-    #[regex(r#""([^"\\]|\\")""#)]
+    #[regex(r#""([^"\\]|\\")*""#)]
     Str,
 
     /// A punctuator token.
+    #[token("->")]
+    #[token("<-")]
     #[token("::")]
     #[token(".")]
     #[token("?")]
@@ -87,6 +89,7 @@ pub enum RawTok {
     #[token("]")]
     #[token("{")]
     #[token("}")]
+    #[token(";")]
     Punct,
 
     /// An error token.

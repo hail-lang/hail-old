@@ -169,11 +169,17 @@ impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
                     }
 
                     self.lexer.next();
+
+                    let mut peek = self.lexer.clone();
+                    println!("SKIPPING LINE BREAK, PEEK: {:?} ('{}')", peek.next(), peek.slice());
+
                     continue;
                 }
 
                 return;
             }
+
+            break;
         }
     }
 
@@ -182,12 +188,16 @@ impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
         let mut tokens = vec![];
         let start = self.lexer.span().start;
         let old_is_group = self.is_group;
+        self.can_insert = false;
 
-        if close != "}" { self.is_group = true }
+        if close != "}" { self.is_group = true } else { self.is_block = true }
 
         loop {
+            self.skip_tokens();
             let mut peek = self.lexer.clone();
             if let Some(_) = peek.next() {
+                println!("SKIPPING OTKENS");
+                println!("PEEK: '{}' (@{:?})", peek.slice(), peek.span());
                 if peek.slice() == close {
                     self.lexer.next();
                     break;
@@ -299,6 +309,7 @@ impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
                             })))
                         },
                         "{" => {
+                            println!("OPEN!!!!!!!!!!!!!");
                             let start = self.lexer.span();
                             let tokens = self.lex_group("}")?;
                             self.can_insert = true;
@@ -355,7 +366,7 @@ impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
                         .with_code("E0002")
                         .with_highlight(Loc::from_usize_range(self.lexer.span(), source))
                         .with_msg("invalid token")
-                        .with_note("i don't know how to process this character!  perhaps it's in a different language?");
+                        .with_note("i don't know how to process this! perhaps it's in a different language?");
 
                     builder.throw(diag);
 
