@@ -90,6 +90,7 @@ pub enum RawTok {
     #[token("{")]
     #[token("}")]
     #[token(";")]
+    #[token(",")]
     Punct,
 
     /// An error token.
