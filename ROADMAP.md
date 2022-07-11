@@ -1,50 +1,36 @@
 # Roadmap
-This is a list of features we aim to implement.  This project uses the GitHub issue system as a todo list, and allows for discussion of features.
-
-## Language design
-### Declarations
-- Routines (routines are functions in Hail)
-- Structs
-- Enums, with algebraic data types
-- Traits
-- Struct applications
-```hail
-apply MyTrait to MyStruct {
-    // ...
-}
-
-apply MyStruct {
-    new :: routine() -> MyStruct {
-        return MyStruct::{
-            // ...
-        }
-    }
-}
-```
-- Import statements
-```hail
-import lib
-import lib as lib2
-import { MyStruct, my_routine } from lib
-```
-
-### Syntax
-- Optional semicolons, using automatic semicolon insertion ([testing #3](https://github.com/hail-lang/hail/issues/3))
-- Math
-- Comments (block comments aren't supported in Hail)
-- Struct field accesses
-- Struct static accesses
-- Function calls
-- Struct construction
-- `val` variables
-- `if` statements
-- `while` statements
-- `return` statements
-- `break` statements
-- `continue` statements
+A list of features that have yet to be implemented for Hail.
 
 ## Compiler
-> TODO: list the compiler stuff.
-
-## Diagnostics
-- Pretty diagnostics using `codespan-reporting` ([testing #2](https://github.com/hail-lang/hail/issues/2))
+- [x] Diagnostics
+    - [x] make 'em pretty! ([#2](https://github.com/hail-lang/hail/issues/2))  thank you `codespan-reporting`
+- [x] Lexer
+    - [x] Whitespace and Line breaks
+    - [x] Integer constants (as well as `0x0` and `0b0` constants)
+    - [x] Float constants
+    - [x] Identifier literals
+    - [x] String literals
+    - [x] Punctuation
+    - [x] Groups (`()`, `[]` and `{}`)
+    - [x] Comments
+    - [x] Automatic semicolon insertion ([#3](https://github.com/hail-lang/hail/issues/3))
+- [ ] Parser
+    - [ ] Literals & constants
+    - [ ] Paths & field accessing (`path1::path2`, `my_struct.my_field`)
+    - [ ] Function calls
+    - [ ] Basic operators
+    - [ ] `as` expressions
+    - [ ] Type annotations/declarations
+    - [ ] `val` variable declarations
+    - [ ] `if` statements
+    - [ ] `while` statements
+    - [ ] `test`/`match` statements (name undetermined at this time).
+    - [ ] `return` statements
+    - [ ] `continue` statements
+    - [ ] `break` statements
+    - [ ] `routine` declarations
+    - [ ] `struct` declarations
+    - [ ] `enum` declarations
+    - [ ] `trait` declarations (??? undetermined whether or not this will be implemented).
+    - [ ] `import` declarations.
+- [ ] Everything else (**todo**: fill in the rest when we are later on in the compiler process)
