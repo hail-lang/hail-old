@@ -1,0 +1,10 @@
+[package]
+name = "hail"
+version = "0.0.0-alpha"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hailc = { path = "../hailc", version = "0.0.0-alpha" }
+clap = { version = "3.2.8", features = ["derive"] }

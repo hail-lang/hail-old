@@ -5,9 +5,13 @@
 use hailc_ctx::Ctx;
 use hailc_diag::DiagBuilder;
 use hailc_diag::driver::DiagDriver;
-use hailc_lexer::{Tok, Asi};
+use hailc_lexer::{Asi, Tok};
 use hailc_loc::Idx;
 use hailc_loc::files::FileRegistry;
+
+pub use hailc_diag as diag;
+pub use hailc_lexer as lexer;
+pub use hailc_loc as loc;
 
 /// An easy-to-use interface for accessing the Hail compiler.
 /// 
@@ -30,9 +34,13 @@ impl<'a, Driver: DiagDriver> Compiler<'a, Driver> {
     }
 
     /// Tokenizes the source string of the compiler.
-    pub fn lex(&'a mut self) -> Result<Vec<Tok>, DiagBuilder<'a, Driver>> {
+    pub fn lex(&mut self) -> Result<Vec<Tok>, DiagBuilder<'a, Driver>> {
         let ctx = Ctx::new(Idx::from_u32(0), self.driver.clone());
         let mut lexer = Asi::new(self.files.get_file_source(Idx::from_u32(0)), ctx);
         lexer.lex()
+    }
+
+    pub fn files(&self) -> FileRegistry<'a> {
+        self.files.clone()
     }
 }

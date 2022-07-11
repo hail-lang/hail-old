@@ -1,0 +1,3 @@
+main :: routine() {
+    val my_prop = 42
+}

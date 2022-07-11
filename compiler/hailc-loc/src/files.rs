@@ -11,6 +11,7 @@ impl<'a> Indexable for File<'a> {
 }
 
 /// A [`FileRegistry`], which keeps track of files being compiled in a workspace.
+#[derive(Clone, Debug, PartialEq)]
 pub struct FileRegistry<'a> {
     /// The file names in this [`FileRegistry`].
     private: Vec<File<'a>>,
