@@ -1,0 +1,11 @@
+unit imports
+
+import { MyStruct } from library
+
+main :: routine() {
+    val my_struct = MyStruct::{
+        my_value <- 42,
+    }
+
+    println(uint::as_str(my_struct.my_value))
+}

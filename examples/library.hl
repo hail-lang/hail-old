@@ -1,0 +1,5 @@
+unit library
+
+MyStruct :: shared struct {
+    my_value <- uint,
+}
