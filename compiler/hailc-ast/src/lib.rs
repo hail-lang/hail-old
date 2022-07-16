@@ -1,8 +1,11 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+/// An AST tree that represents a single Hail unit.
+pub struct AstUnit {
+
+}
+
+impl AstUnit {
+    /// Creates an empty [`AstUnit`], for the parser.
+    pub fn new() -> Self {
+        Self {}
     }
 }

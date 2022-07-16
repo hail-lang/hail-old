@@ -105,6 +105,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "hailc-ast"
+version = "0.0.0-alpha"
+dependencies = [
+ "hailc-loc",
+]
+
+[[package]]
 name = "hailc-ctx"
 version = "0.0.0-alpha"
 dependencies = [
@@ -133,6 +140,17 @@ dependencies = [
 [[package]]
 name = "hailc-loc"
 version = "0.0.0-alpha"
+
+[[package]]
+name = "hailc-parser"
+version = "0.0.0-alpha"
+dependencies = [
+ "hailc-ast",
+ "hailc-ctx",
+ "hailc-diag",
+ "hailc-lexer",
+ "hailc-loc",
+]
 
 [[package]]
 name = "hashbrown"

@@ -2,8 +2,10 @@
 members = [
     "compiler/hail",
     "compiler/hailc",
+    "compiler/hailc-ast",
     "compiler/hailc-ctx",
     "compiler/hailc-diag",
     "compiler/hailc-lexer",
     "compiler/hailc-loc",
+    "compiler/hailc-parser",
 ]
