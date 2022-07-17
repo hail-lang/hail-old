@@ -44,6 +44,16 @@ pub mod value {
         pub value: i64,
     }
 
+    /// An float value.
+    #[derive(Clone, Debug, PartialEq)]
+    pub struct Float<'a> {
+        /// The location of the float.
+        pub loc: Loc<'a>,
+
+        /// The parsed float value.
+        pub value: f64,
+    }
+
     /// A value expression.
     #[derive(Clone, Debug, PartialEq)]
     pub enum Value<'a> {
@@ -55,6 +65,9 @@ pub mod value {
 
         /// An integer value.
         Int(Int<'a>),
+
+        /// An float value.
+        Float(Float<'a>),
     }
 }
 

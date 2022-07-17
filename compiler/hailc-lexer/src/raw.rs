@@ -8,7 +8,7 @@ pub enum RawTok {
     LineBreak,
 
     /// A floating point number constant.
-    #[regex("-?[0-9]+\\.([eE][-+]?[0-9]+)?")]
+    #[regex("-?[0-9]+\\.([0-9]+([eE][-+]?[0-9]+)?)?")]
     Float,
 
     /// An integer constant.

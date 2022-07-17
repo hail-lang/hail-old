@@ -190,6 +190,37 @@ impl<'a, Driver: DiagDriver> Parser<'a, Driver> {
         }
     }
 
+    /// Parses an integer value.
+    #[inline]
+    fn parse_float(&mut self, stream: &mut TokenStream<'a>) -> Option<value::Float<'a>> {
+        if let Some(tok) = stream.peek() {
+            match tok {
+                Tok::Float(float) => {
+                    stream.next();
+                    Some(value::Float {
+                        loc: float.loc,
+                        value: match float.value.parse() {
+                            Ok(val) => val,
+                            Err(e) => {
+                                let diag = self.ctx.builder().new_bug()
+                                    .with_code("E0008")
+                                    .with_highlight(float.loc)
+                                    .with_msg("invalid float")
+                                    .with_note("this should (??) be unreachable");
+                                            
+                                self.ctx.builder().throw(diag);
+                                return None;
+                            },
+                        },
+                    })
+                },
+                _ => None
+            }
+        } else {
+            None
+        }
+    }
+
     /// Parses a single primary expression.
     fn parse_primary(&mut self, stream: &mut TokenStream<'a>) -> Option<Value<'a>> {
         if let Some(bool) = self.parse_bool(stream) {
@@ -198,6 +229,8 @@ impl<'a, Driver: DiagDriver> Parser<'a, Driver> {
             return Some(Value::Name(name))
         } else if let Some(int) = self.parse_int(stream) {
             return Some(Value::Int(int))
+        } else if let Some(float) = self.parse_float(stream) {
+            return Some(Value::Float(float))
         }
 
         None
