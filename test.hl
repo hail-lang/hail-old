@@ -1,3 +1,2 @@
-main :: routine() {
-    val my_prop = 42
-}
+// TODO: strings
+hello 4.2e1
