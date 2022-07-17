@@ -57,7 +57,7 @@ fn main() {
             let mut compiler = Compiler::for_file(&input, &source, CodespanDriver::default());
             let files = compiler.files();
             let toks = compiler.lex().unwrap_or_emit(&files);
-            let ast = compiler.parse(toks).unwrap_or_emit(&files);
+            let _ast = compiler.parse(toks).unwrap_or_emit(&files);
             //dbg!(res);
         },
     }

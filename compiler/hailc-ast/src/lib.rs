@@ -23,6 +23,27 @@ pub mod value {
         pub value: bool,
     }
 
+    /// The kind of an integer value.
+    #[derive(Clone, Debug, PartialEq)]
+    pub enum IntKind {
+        Plain,
+        Hex,
+        Bin,
+    }
+    
+    /// An integer value.
+    #[derive(Clone, Debug, PartialEq)]
+    pub struct Int<'a> {
+        /// The location of the integer.
+        pub loc: Loc<'a>,
+
+        /// The syntax used to declare this integer.
+        pub kind: IntKind,
+
+        /// The parsed integer value.
+        pub value: i64,
+    }
+
     /// A value expression.
     #[derive(Clone, Debug, PartialEq)]
     pub enum Value<'a> {
@@ -31,6 +52,9 @@ pub mod value {
 
         /// A name value.
         Name(Name<'a>),
+
+        /// An integer value.
+        Int(Int<'a>),
     }
 }
 
