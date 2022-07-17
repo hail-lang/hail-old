@@ -1,9 +1,7 @@
-unit imports
-
 import { MyStruct } from library
 
 main :: routine() {
-    val my_struct = MyStruct::{
+    val my_struct = library::MyStruct::{
         my_value <- 42,
     }
 

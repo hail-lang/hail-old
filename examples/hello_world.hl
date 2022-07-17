@@ -1,6 +1,4 @@
-unit hello_world
-
-import { println } from io
+import { io::println } from io
 
 main :: routine() {
     println("Hello, world!")
