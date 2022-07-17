@@ -9,6 +9,16 @@ use hailc_loc::Loc;
 use hailc_diag::{driver::DiagDriver, DiagBuilder};
 use logos::{Lexer, Logos};
 
+/// A boolean token.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Bool<'a> {
+    /// The location of the token.
+    pub loc: Loc<'a>,
+
+    /// The raw value of the boolean.
+    pub value: &'a str,
+}
+
 /// A punctuator token.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Punct<'a> {
@@ -102,6 +112,9 @@ pub struct Group<'a> {
 /// A token in the lexer.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Tok<'a> {
+    /// A boolean token.
+    Bool(Bool<'a>),
+
     /// A punctuator token.
     Punct(Punct<'a>),
 
@@ -171,7 +184,6 @@ impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
                     self.lexer.next();
 
                     let mut peek = self.lexer.clone();
-                    println!("SKIPPING LINE BREAK, PEEK: {:?} ('{}')", peek.next(), peek.slice());
 
                     continue;
                 }
@@ -196,8 +208,6 @@ impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
             self.skip_tokens();
             let mut peek = self.lexer.clone();
             if let Some(_) = peek.next() {
-                println!("SKIPPING OTKENS");
-                println!("PEEK: '{}' (@{:?})", peek.slice(), peek.span());
                 if peek.slice() == close {
                     self.lexer.next();
                     break;
@@ -282,10 +292,22 @@ impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
                 },
                 RawTok::Id => {
                     self.can_insert = true;
-                    return Ok(Some(Tok::Id(Id {
-                        loc: Loc::from_usize_range(self.lexer.span(), self.ctx.source()),
-                        value: self.lexer.slice(),
-                    })))
+                    let slice = self.lexer.slice();
+
+                    return match self.lexer.slice() {
+                        "true" => Ok(Some(Tok::Bool(Bool {
+                            loc: Loc::from_usize_range(self.lexer.span(), self.ctx.source()),
+                            value: slice,
+                        }))),
+                        "false" => Ok(Some(Tok::Bool(Bool {
+                            loc: Loc::from_usize_range(self.lexer.span(), self.ctx.source()),
+                            value: slice,
+                        }))),
+                        _ => Ok(Some(Tok::Id(Id {
+                            loc: Loc::from_usize_range(self.lexer.span(), self.ctx.source()),
+                            value: slice,
+                        }))),
+                    };
                 },
                 RawTok::Str => {
                     self.can_insert = true;
@@ -309,7 +331,6 @@ impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
                             })))
                         },
                         "{" => {
-                            println!("OPEN!!!!!!!!!!!!!");
                             let start = self.lexer.span();
                             let tokens = self.lex_group("}")?;
                             self.can_insert = true;
