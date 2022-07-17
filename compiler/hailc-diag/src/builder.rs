@@ -58,6 +58,11 @@ impl<'a, Driver: DiagDriver> DiagBuilder<'a, Driver> {
         self.diags.push(diag);
     }
 
+    /// Returns whether or not an error diagnostic has been thrown.
+    pub fn err(&self) -> bool {
+        self.err
+    }
+
     /// Emits the diagnostics in this diagnostic emitter to the terminal.
     pub fn emit(&mut self, files: &FileRegistry) {
         for diag in &self.diags {
