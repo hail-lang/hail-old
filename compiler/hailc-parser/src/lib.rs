@@ -9,7 +9,7 @@ use stream::TokenStream;
 use hailc_ast::*;
 use hailc_ctx::Ctx;
 use hailc_diag::{driver::DiagDriver, DiagBuilder};
-use hailc_lexer::{Tok, Id, IntKind};
+use hailc_lexer::{Tok, IntKind};
 
 /// The parser.
 pub struct Parser<'a, Driver: DiagDriver> {
