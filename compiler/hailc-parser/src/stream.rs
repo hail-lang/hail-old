@@ -1,4 +1,3 @@
-use std::iter::Peekable;
 use std::vec::IntoIter;
 
 use hailc_lexer::Tok;
