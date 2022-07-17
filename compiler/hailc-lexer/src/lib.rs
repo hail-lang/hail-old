@@ -183,8 +183,6 @@ impl<'a, Driver: DiagDriver> Asi<'a, Driver> {
 
                     self.lexer.next();
 
-                    let mut peek = self.lexer.clone();
-
                     continue;
                 }
 
