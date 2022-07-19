@@ -51,7 +51,7 @@ pub enum RawTok {
     /// ```hail
     /// "Hello, world!"
     /// ```
-    #[regex(r#""([^"\\]|\\")*""#)]
+    #[regex(r#""([^"\\]|\\.)*""#)]
     Str,
 
     /// A punctuator token.
