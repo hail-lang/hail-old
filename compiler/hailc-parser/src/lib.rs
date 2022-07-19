@@ -10,6 +10,8 @@ use hailc_ast::*;
 use hailc_ctx::Ctx;
 use hailc_diag::{driver::DiagDriver, DiagBuilder};
 use hailc_lexer::{Tok, IntKind};
+use hailc_loc::Loc;
+use snailquote::{unescape, UnescapeError};
 
 /// The parser.
 pub struct Parser<'a, Driver: DiagDriver> {
@@ -221,6 +223,46 @@ impl<'a, Driver: DiagDriver> Parser<'a, Driver> {
         }
     }
 
+    /// Parses a single string token, if any.
+    fn parse_str(&mut self, stream: &mut TokenStream<'a>) -> Option<value::Str<'a>> {
+        if let Some(tok) = stream.peek() {
+            if let Tok::Str(str) = tok {
+                stream.next();
+                match unescape(str.value) {
+                    Ok(value) => Some(value::Str {
+                        loc: str.loc,
+                        value: value,
+                    }),
+                    Err(err) => {
+                        // let idx = match err {
+                        //     UnescapeError::InvalidEscape { index, .. } => index,
+                        //     UnescapeError::InvalidUnicode { index, .. } => index,
+                        // };
+
+                        //let start = str.loc.start();
+                        //let range = (start + idx as u32)..(start + idx as u32);
+
+                        // TODO: use `err` to make better diagnostics
+
+                        let diag = self.ctx.builder().new_err()
+                            .with_code("E0009")
+                            .with_highlight(str.loc)
+                            //.with_highlight(Loc::from_u32_range(range, str.loc.source()))
+                            .with_msg("this is an invalid string.");
+                        
+                        self.ctx.builder().throw(diag);
+                        
+                        None
+                    }
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
     /// Parses a single primary expression.
     fn parse_primary(&mut self, stream: &mut TokenStream<'a>) -> Option<Value<'a>> {
         if let Some(bool) = self.parse_bool(stream) {
@@ -231,14 +273,14 @@ impl<'a, Driver: DiagDriver> Parser<'a, Driver> {
             return Some(Value::Int(int))
         } else if let Some(float) = self.parse_float(stream) {
             return Some(Value::Float(float))
+        } else if let Some(str) = self.parse_str(stream) {
+            return Some(Value::Str(str))
         }
 
         None
     }
 
     /// Parses the entire source file, from the roots.
-    /// 
-    /// 
     pub fn parse(&mut self, toks: Vec<Tok<'a>>) -> Result<AstUnit, DiagBuilder<'a, Driver>> {
         let mut stream = TokenStream::from_vec(toks);
 

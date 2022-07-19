@@ -54,6 +54,16 @@ pub mod value {
         pub value: f64,
     }
 
+    /// A string value.
+    #[derive(Clone, Debug, PartialEq)]
+    pub struct Str<'a> {
+        /// The location of the string.
+        pub loc: Loc<'a>,
+
+        /// The value of the string, with quotes stripped and escape codes parsed.
+        pub value: String,
+    }
+
     /// A value expression.
     #[derive(Clone, Debug, PartialEq)]
     pub enum Value<'a> {
@@ -66,8 +76,11 @@ pub mod value {
         /// An integer value.
         Int(Int<'a>),
 
-        /// An float value.
+        /// A float value.
         Float(Float<'a>),
+
+        /// A string value.
+        Str(Str<'a>),
     }
 }
 
