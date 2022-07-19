@@ -137,6 +137,6 @@ main :: routine() {
 
     assert(UintVec::len(&vec) == 1)
 
-    assert(UintVec::pop(&vec) == some(42))
+    assert(UintVec::pop(&fluid vec) == some(42))
     assert(UintVec::len(&vec) == 0)
 }
