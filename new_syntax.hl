@@ -1,0 +1,57 @@
+// A concept for better syntax in Hail
+
+//
+// New, concept syntax
+//
+import { println } from io
+import { UintVec } from uint
+
+val fib = shared routine(terms <- uint32) -> UintVec {
+    val fluid n1 = 0
+    val fluid n2 = 0
+    val fluid nums = UintVec::new()
+
+    val fluid count = 0
+    while count < terms {
+        UintVec::push(&fluid nums, n1)
+
+        nth = n1 + n2
+        n1 = n2
+        n2 = nth
+
+        count += 1
+    }
+}
+
+val nums = fib(7)
+println(UintVec::as_str(&nums)) // => [0, 1, 1, 2, 3, 5, 8]
+UintVec::drop(nums)
+
+//
+// Old syntax
+//
+import { println } from io
+import { UintVec } from uint
+
+fib :: shared routine(terms <- uint32) -> UintVec {
+    val fluid n1 = 0
+    val fluid n2 = 0
+    val fluid nums = UintVec::new()
+
+    val fluid count = 0
+    while count < terms {
+        UintVec::push(&fluid nums, n1)
+
+        nth = n1 + n2
+        n1 = n2
+        n2 = nth
+
+        count += 1
+    }
+}
+
+main :: routine() {
+    val nums = fib(7)
+    println(UintVec::as_str(&nums)) // => [0, 1, 1, 2, 3, 5, 8]
+    UintVec::drop(nums)
+}
