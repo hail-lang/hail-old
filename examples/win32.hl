@@ -1,0 +1,9 @@
+// Windows library bindings for hail.
+
+unit win32 #win_lib // tell the compiler that this module uses the Windows library.
+
+/// A code page which supports UTF-8 strings.
+val CP_UTF8 <- uint32 = 65001
+
+/// Sets the output code page for the Windows terminal.
+val SetConsoleOutputCP = shared routine(wCodePageID <- uint32) -> bool #c_abi

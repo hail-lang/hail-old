@@ -1,0 +1,32 @@
+// The IO standard library module
+
+unit io
+
+import { io::{printf, putchar} } from libc
+import { Chars } from str
+@if(windows)
+import * from win32
+
+val print_char = shared routine(c <- char) {
+    // Output on windows breaks if this isn't called
+    @if(windows)
+    SetConsoleOutputCP(CP_UTF8)
+
+    printf(char::as_c_str(&c))
+}
+
+val println = shared routine(s <- str) {
+    val chars = fluid str::chars(&s)
+
+    val next = fluid Chars::next(&fluid chars)
+    while true {
+        match next {
+            c <- some => {
+                print_char(c)
+            },
+            _ => break,
+        }
+    }
+
+    putchar("\n")
+}

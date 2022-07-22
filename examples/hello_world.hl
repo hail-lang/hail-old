@@ -1,0 +1,3 @@
+import { println } from io
+
+println("Hello, hail! ☁️")
