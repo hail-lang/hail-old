@@ -203,7 +203,7 @@ impl<'a, Driver: DiagDriver> Parser<'a, Driver> {
                         loc: float.loc,
                         value: match float.value.parse() {
                             Ok(val) => val,
-                            Err(e) => {
+                            Err(_) => {
                                 let diag = self.ctx.builder().new_bug()
                                     .with_code("E0008")
                                     .with_highlight(float.loc)

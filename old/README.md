@@ -3,6 +3,8 @@
     <p align="center" style="font-style: italic;">A type-safe, high speed programming language for scalable systems!  (featuring a cheesy logo!)</p>
 </p>
 
+> OLD IMPLEMENTATION
+
 > _**note:**_ the compiler is unfinished and probably buggy.  this means that until the language reaches a more stable state (i.e. the beta stage), the language may introduce many breaking changes between versions.  in the future, it will be our goal to introduce as few breaking features as possible, to ensure backwards compatibility.
 
 # Table of Contents
