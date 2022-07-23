@@ -11,6 +11,9 @@
 - [examples](#examples)
     - [hello, world!](#hello-world)
     - [vecs](#vecs)
+- [building](#building)
+    - [on windows](#on-windows)
+    - [on others](#on-others)
 
 # goals
 - *Be all in one*: hail should be a compiler, build tool and package manager, all in one.
@@ -135,4 +138,22 @@ while i < UintVec::len(&my_vec) {
 // => 86
 
 UintVec::drop(my_vec) // free the memory used by the Vec.
+```
+
+# building
+
+## on windows
+Building on Windows requires Mingw or an equivalent.  A build script for Windows is included, it can be ran with the following command:
+
+```batch
+build
+```
+
+## on others
+There's no build scripts for other platforms yet; as I only use Windows.  In the future I will make build scripts for Linux/MacOS.
+
+For now, just link everything in `src` together with GCC/Clang with a command like this:
+
+```sh
+gcc -Iinclude src/main.c ... -o hail
 ```
