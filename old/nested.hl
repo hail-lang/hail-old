@@ -1,3 +1,0 @@
-import io
-
-io::println("Hello, world!")

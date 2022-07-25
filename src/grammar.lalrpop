@@ -1,0 +1,475 @@
+use crate::scanner::Tok;
+use crate::ast::*;
+
+grammar<'input>(input: &'input str);
+
+// MACROS
+
+// A macro for lists
+Vec<T>: Vec<T> = <mut items:(<T> ",")*> <end:T?> => match end {
+    Some(end) => {
+        items.push(end);
+        items
+    },
+    _ => items,
+};
+
+// A macro which automagically boxes a pattern
+Box<T>: Box<T> = <item:T> => Box::new(item);
+
+// LITERALS/CONSTANTS
+
+// A boolean constant.
+pub Bool: Bool = {
+    <start:@L> "true" <end:@R> => Bool {
+        span: start..end,
+        value: true,
+    },
+    <start:@L> "false" <end:@R> => Bool {
+        span: start..end,
+        value: false,
+    },
+};
+
+// An identifier literal.
+pub Id: Id<'input> = <start:@L> <value:id> <end:@R> => Id {
+    span: start..end,
+    value,
+};
+
+// A number literal.
+pub Num: Num<'input> = {
+    <start:@L> <value:int> <end:@R> => Num {
+        span: start..end,
+        kind: NumKind::Int,
+        value,
+    },
+    <start:@L> <value:xint> <end:@R> => Num {
+        span: start..end,
+        kind: NumKind::XInt,
+        value,
+    },
+    <start:@L> <value:bint> <end:@R> => Num {
+        span: start..end,
+        kind: NumKind::BInt,
+        value,
+    },
+    <start:@L> <value:float> <end:@R> => Num {
+        span: start..end,
+        kind: NumKind::Float,
+        value,
+    },
+};
+
+// A string literal.
+pub Str: Str<'input> = {
+    <start:@L> <value:str> <end:@R> => Str {
+        span: start..end,
+        value,
+    }
+};
+
+// DECLARATIONS
+
+pub Marker: Marker<'input> = <start:@L> "#" <name:Id> <end:@R> => Marker {
+    span: start..end,
+    name,
+};
+
+// Routine declarations
+pub RoutineArg: RoutineArg<'input> = <start:@L> <name:Id> "<-" <ty:Type> <end:@R> => RoutineArg {
+    span: start..end,
+    name,
+    ty,
+};
+
+pub Routine: Routine<'input> = 
+    <start:@L> "routine" "(" <args:Vec<RoutineArg>> ")" <returns:("<-" <Type>)?> <markers:Marker*> <block:Block> <end:@R> => Routine {
+        span: start..end,
+        args,
+        returns,
+        markers,
+        block,
+    };
+
+// TYPES
+
+pub PathType: Type<'input> = {
+    <id:Id> => Type::Id(id),
+    <start:@L> <left:Box<PathType>> "::" <right:Id> <end:@R> => Type::Path(PathType {
+        span: start..end,
+        left,
+        right,
+    }),
+};
+
+pub PrimType: Type<'input> = {
+    <path:PathType> => path,
+    <start:@L> "routine" "(" <args:Vec<Type>> ")" <returns:("->" <Box<Type>>)?> <end:@R> => Type::Routine(RoutineType {
+        span: start..end,
+        args,
+        returns,
+    }),
+}
+
+pub UnaryType: Type<'input> = {
+    <prim:PrimType> => prim,
+    <start:@L> "shared" <subject:Box<UnaryType>> <end:@R> => Type::Shared(SharedType {
+        span: start..end,
+        subject,
+    }),
+    <start:@L> "fluid" <subject:Box<UnaryType>> <end:@R> => Type::Fluid(FluidType {
+        span: start..end,
+        subject,
+    }),
+    <start:@L> "&" <subject:Box<UnaryType>> <end:@R> => Type::Ref(RefType {
+        span: start..end,
+        subject,
+    }),
+    <start:@L> "?" <subject:Box<UnaryType>> <end:@R> => Type::Opt(OptType {
+        span: start..end,
+        subject,
+    }),
+    <start:@L> "!" <ok:Box<UnaryType>> ":" <err:Box<UnaryType>> <end:@R> => Type::Res(ResType {
+        span: start..end,
+        ok,
+        err,
+    })
+};
+
+pub Type: Type<'input> = UnaryType;
+ 
+// EXPRESSIONS
+
+// A primary expression, such as a literal or constant.
+pub PrimExpr: Expr<'input> = {
+    <bool:Bool> => Expr::Bool(bool),
+    <id:Id> => Expr::Id(id),
+    <num:Num> => Expr::Num(num),
+    <str:Str> => Expr::Str(str),
+    "(" <expr:Expr> ")" => expr,
+    <routine:Routine> => Expr::Routine(routine),
+};
+
+pub Call: Call<'input> = <start:@L> <left:Box<PathExpr>> "(" <args:Vec<Expr>> ")" <end:@R> => Call {
+    span: start..end,
+    left,
+    args,
+};
+
+// A path expression, such as `unit::MyStruct`.
+pub PathExpr: Expr<'input> = {
+    <prim:PrimExpr> => prim,
+    <start:@L> <left:Box<PathExpr>> "::" <id:Id> <end:@R> => Expr::Path(Path {
+        span: start..end,
+        left,
+        right: id,
+    }),
+    <start:@L> <left:Box<PathExpr>> "." <id:Id> <end:@R> => Expr::Access(Access {
+        span: start..end,
+        left,
+        right: id,
+    }),
+    <call:Call> => Expr::Call(call),
+    // TODO: struct constructing
+};
+
+// A unary expression, such as `&fluid variable`.
+pub UnaryOp: UnaryOp = {
+    "-" => UnaryOp::Min,
+    "*" => UnaryOp::Star,
+    "!" => UnaryOp::Bang,
+    "&" => UnaryOp::Borrow,
+    "fluid" => UnaryOp::Fluid,
+    "shared" => UnaryOp::Shared,
+};
+
+pub UnaryExpr: Expr<'input> = {
+    <path:PathExpr> => path,
+    <start:@L> <op:UnaryOp> <subject:Box<UnaryExpr>> <end:@R> => Expr::Unary(Unary {
+        span: start..end,
+        op,
+        subject,
+    }),
+};
+
+pub AsExpr: Expr<'input> = {
+    <unary:UnaryExpr> => unary,
+    <start:@L> <subject:Box<AsExpr>> "as" <ty:Type> <end:@R> => Expr::As(As {
+        span: start..end,
+        subject,
+        ty,
+    })
+};
+
+pub MulOp: BinaryOp = {
+    "*" => BinaryOp::Star,
+    "/" => BinaryOp::Slash,
+    "%" => BinaryOp::Perc,
+};
+
+pub MulExpr: Expr<'input> = {
+    <as_:AsExpr> => as_,
+    <start:@L> <left:Box<MulExpr>> <op:MulOp> <right:Box<AsExpr>> <end:@R> => Expr::Binary(Binary {
+        op,
+        left,
+        right,
+    }),
+};
+
+pub AddOp: BinaryOp = {
+    "+" => BinaryOp::Plus,
+    "-" => BinaryOp::Min,
+};
+
+pub AddExpr: Expr<'input> = {
+    <mul:MulExpr> => mul,
+    <start:@L> <left:Box<AddExpr>> <op:AddOp> <right:Box<MulExpr>> <end:@R> => Expr::Binary(Binary {
+        op,
+        left,
+        right,
+    }),
+};
+
+pub ShiftOp: BinaryOp = {
+    "<<" => BinaryOp::LtLt,
+    ">>" => BinaryOp::GtGt,
+};
+
+pub ShiftExpr: Expr<'input> = {
+    <add:AddExpr> => add,
+    <start:@L> <left:Box<ShiftExpr>> <op:ShiftOp> <right:Box<AddExpr>> <end:@R> => Expr::Binary(Binary {
+        op,
+        left,
+        right,
+    }),
+};
+
+pub BitAndExpr: Expr<'input> = {
+    <shift:ShiftExpr> => shift,
+    <start:@L> <left:Box<BitAndExpr>> "&" <right:Box<ShiftExpr>> <end:@R> => Expr::Binary(Binary {
+        op: BinaryOp::Amp,
+        left,
+        right,
+    }),
+};
+
+pub BitXorExpr: Expr<'input> = {
+    <and:BitAndExpr> => and,
+    <start:@L> <left:Box<BitXorExpr>> "^" <right:Box<BitAndExpr>> <end:@R> => Expr::Binary(Binary {
+        op: BinaryOp::Caret,
+        left,
+        right,
+    })
+};
+
+pub BitOrExpr: Expr<'input> = {
+    <xor:BitXorExpr> => xor,
+    <start:@L> <left:Box<BitOrExpr>> "|" <right:Box<BitXorExpr>> <end:@R> => Expr::Binary(Binary {
+        op: BinaryOp::Pipe,
+        left,
+        right,
+    }),
+};
+
+pub CompOp: BinaryOp = {
+    "==" => BinaryOp::EqEq,
+    "!=" => BinaryOp::BangEq,
+    "<" => BinaryOp::Lt,
+    ">" => BinaryOp::Gt,
+    "<=" => BinaryOp::LtEq,
+    ">=" => BinaryOp::GtEq,
+};
+
+pub CompExpr: Expr<'input> = {
+    <or:BitOrExpr> => or,
+    <start:@L> <left:Box<CompExpr>> <op:CompOp> <right:Box<BitOrExpr>> => Expr::Binary(Binary {
+        op,
+        left,
+        right,
+    })
+};
+
+pub LogAndExpr: Expr<'input> = {
+    <comp:CompExpr> => comp,
+    <start:@L> <left:Box<LogAndExpr>> "&&" <right:Box<CompExpr>> <end:@R> => Expr::Binary(Binary {
+        op: BinaryOp::AmpAmp,
+        left,
+        right,
+    }),
+};
+
+pub LogOrExpr: Expr<'input> = {
+    <and:LogAndExpr> => and,
+    <start:@L> <left:Box<LogOrExpr>> "||" <right:Box<LogAndExpr>> <end:@R> => Expr::Binary(Binary {
+        op: BinaryOp::PipePipe,
+        left,
+        right,
+    }),
+};
+
+// Assign expressions are special, as they cannot be used as values.
+pub AssignOp: AssignOp = {
+    "=" => AssignOp::Eq,
+    "+=" => AssignOp::PlusEq,
+    "-=" => AssignOp::MinEq,
+    "*=" => AssignOp::StarEq,
+    "/=" => AssignOp::SlashEq,
+    "%=" => AssignOp::PercEq,
+    "&=" => AssignOp::AmpEq,
+    "|=" => AssignOp::PipeEq,
+    "^=" => AssignOp::CaretEq,
+    "<<=" => AssignOp::LtLtEq,
+    ">>=" => AssignOp::GtGtEq,
+};
+
+// Matches any valid hail expression.
+pub Expr: Expr<'input> = { 
+    <LogOrExpr>,
+};
+
+pub Assign: Assign<'input> = <start:@L> <left:PrimExpr> <op:AssignOp> <right:Expr> <end:@R> => Assign {
+    span: start..end,
+    op,
+    left,
+    right,
+};
+
+pub Val: Val<'input> = <start:@L> "val" <name:Id> <ty:("<-" <Type>)?> <value:("=" <Expr>)?> <end:@R> => Val {
+    span: start..end,
+    name,
+    ty,
+    value,
+};
+
+pub BlockExpr: BlockExpr<'input> = {
+    <assign:Assign> => BlockExpr::Assign(assign),
+    <val:Val> => BlockExpr::Val(val),
+    <call:Call> => BlockExpr::Call(call),
+};
+
+pub Block: Block<'input> = <start:@L> "{" <mut items:(<BlockExpr> ";")*> <last:BlockExpr?> "}" <end:@R> => match last {
+    Some(last) => {
+        items.push(last);
+        Block {
+            span: start..end,
+            items,
+        }
+    },
+    None => Block {
+        span: start..end,
+        items,
+    },
+};
+
+/// An item being imported.
+pub ImportItem: ImportItem<'input> = <start:@L> <name:Id> <as_:("as" <Id>)?> <end:@R> => ImportItem {
+    span: start..end,
+    name,
+    as_,
+};
+
+// An import statement
+pub Import: Import<'input> = {
+    <start:@L> <shared:"shared"?> "import" <item:ImportItem> <from:("from" <Id>)?> <end:@R> => Import::Single {
+        span: start..end,
+        shared: match shared { Some(_) => true, _ => false },
+        item,
+        from,
+    },
+    <start:@L> <shared:"shared"?> "import" "{" <items:Vec<ImportItem>> "}" <from:("from" <Id>)> <end:@R> => Import::Multi {
+        span: start..end,
+        shared: match shared { Some(_) => true, _ => false },
+        items,
+        from,
+    },
+};
+
+pub RootStmnt: RootStmnt<'input> = {
+    <assign:Assign> => RootStmnt::Assign(assign),
+    <val:Val> => RootStmnt::Val(val),
+    <call:Call> => RootStmnt::Call(call),
+    <import:Import> => RootStmnt::Import(import),
+};
+
+pub RootStmnts: Vec<RootStmnt<'input>> = <mut items:(<RootStmnt> ";")*> <last:RootStmnt?> => match last {
+    Some(last) => {
+        items.push(last);
+        items
+    },
+    None => items,
+};
+
+// THE CUSTOM LEXER
+
+// Bindings to the custom lexer written in the `scanner` module.
+extern {
+    type Location = usize;
+    type Error = ();
+
+    enum Tok<'input> {
+        "#" => Tok::Hash,
+        "::" => Tok::ColCol,
+        ":" => Tok::Col,
+        "." => Tok::Dot,
+        "?" => Tok::Quest,
+        "<-" => Tok::LArrow,
+        "->" => Tok::RArrow,
+        "=>" => Tok::FatArrow,
+        "-=" => Tok::MinEq,
+        "-" => Tok::Min,
+        "*=" => Tok::StarEq,
+        "*" => Tok::Star,
+        "!=" => Tok::BangEq,
+        "!" => Tok::Bang,
+        "&&" => Tok::AmpAmp,
+        "&=" => Tok::AmpEq,
+        "&" => Tok::Amp,
+        "/=" => Tok::SlashEq,
+        "/" => Tok::Slash,
+        "%=" => Tok::PercEq,
+        "%" => Tok::Perc,
+        "+=" => Tok::PlusEq,
+        "+" => Tok::Plus,
+        "<<=" => Tok::LtLtEq,
+        "<<" => Tok::LtLt,
+        "<=" => Tok::LtEq,
+        "<" => Tok::Lt,
+        ">>=" => Tok::GtGtEq,
+        ">>" => Tok::GtGt,
+        ">=" => Tok::GtEq,
+        ">" => Tok::Gt,
+        "^=" => Tok::CaretEq,
+        "^" => Tok::Caret,
+        "|=" => Tok::PipeEq,
+        "||" => Tok::PipePipe,
+        "|" => Tok::Pipe,
+        "==" => Tok::EqEq,
+        "=" => Tok::Eq,
+        "[" => Tok::LBrack,
+        "]" => Tok::RBrack,
+        "(" => Tok::LParen,
+        ")" => Tok::RParen,
+        "{" => Tok::LCurly,
+        "}" => Tok::RCurly,
+        "," => Tok::Comma,
+        ";" => Tok::Semi,
+
+        "true" => Tok::KTrue,
+        "false" => Tok::KFalse,
+        "fluid" => Tok::KFluid,
+        "as" => Tok::KAs,
+        "routine" => Tok::KRoutine,
+        "val" => Tok::KVal,
+        "shared" => Tok::KShared,
+        "import" => Tok::KImport,
+        "from" => Tok::KFrom,
+        
+        id => Tok::Id(<&'input str>),
+        int => Tok::Int(<&'input str>),
+        xint => Tok::XInt(<&'input str>),
+        bint => Tok::BInt(<&'input str>),
+        float => Tok::Float(<&'input str>),
+        str => Tok::Str(<&'input str>),
+    }
+}

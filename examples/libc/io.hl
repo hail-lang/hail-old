@@ -1,9 +1,0 @@
-// Bindings to some of the `stdio` methods from the C standard library.
-
-unit io
-
-/// Prints a string to the terminal, with the provided formatting arguments.
-val printf = shared routine(str <- c_str, ...) #c_abi
-
-/// Prints a single string to the terminal.
-val putchar = shared routine(str <- c_char) #c_abi

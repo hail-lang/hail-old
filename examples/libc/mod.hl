@@ -1,6 +1,0 @@
-// Bindings to some of the C standard library methods.
-
-unit libc #c_lib // tell the compiler that this module uses the C standard library; so we need to link it.
-                 // by default; hail links with the `-nostd` flag for C, so there isn't unnecessary use of the C standard library.
-
-shared import io
