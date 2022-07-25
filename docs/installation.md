@@ -1,13 +1,13 @@
-# Installation
+# installation
 hail is written in Rust, with no non-Rust dependencies, which makes building it a lot easier.
 
-## Prerequisites
+## prerequisites
 - Git, to download the source code.
 - Cargo, for building hail.
 
 (that's it!)
 
-## Building
+## building
 To build hail you simply need to download the source code:
 
 ```batch
