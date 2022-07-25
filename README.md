@@ -6,3 +6,7 @@
 [Installation](docs/installation.md)
 
 A guide for installing and setting up hail.
+
+[Goals](docs/goals.md)
+
+The goals of hail as a programming language and open source project.
