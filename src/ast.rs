@@ -631,6 +631,7 @@ pub enum BlockExpr<'a> {
     Break(Break<'a>),
     Continue(Continue<'a>),
     Return(Return<'a>),
+    Block(Box<Block<'a>>),
 }
 
 /// A code block.
@@ -725,4 +726,5 @@ pub enum RootStmnt<'a> {
     Match(Match<'a>),
     TypeDecl(TypeDecl<'a>),
     Apply(Apply<'a>),
+    Block(Block<'a>),
 }

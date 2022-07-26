@@ -489,6 +489,7 @@ pub BlockExpr: BlockExpr<'input> = {
     <br:Break> => BlockExpr::Break(br),
     <cont:Continue> => BlockExpr::Continue(cont),
     <ret:Return> => BlockExpr::Return(ret),
+    <block:Box<Block>> => BlockExpr::Block(block),
 };
 
 pub Block: Block<'input> = <start:@L> "{" <mut items:(<BlockExpr> ";")*> <last:BlockExpr?> "}" <end:@R> => match last {
@@ -563,6 +564,7 @@ pub RootStmnt: RootStmnt<'input> = {
     <match_:Match> => RootStmnt::Match(match_),
     <ty:TypeDecl> => RootStmnt::TypeDecl(ty),
     <apply:Apply> => RootStmnt::Apply(apply),
+    <block:Block> => RootStmnt::Block(block),
 };
 
 pub RootStmnts: Vec<RootStmnt<'input>> = <mut items:(<RootStmnt> ";")*> <last:RootStmnt?> => match last {
