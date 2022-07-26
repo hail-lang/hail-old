@@ -409,8 +409,9 @@ pub If: If<'input> = <start:@L> "if" <cond:Expr> <block:Block> <branches:IfBranc
 };
 
 // While statements
-pub While: While<'input> = <start:@L> "while" <cond:Expr> <block:Block> <end:@R> => While {
+pub While: While<'input> = <start:@L> <label:(<Id> ":")?> "while" <cond:Expr> <block:Block> <end:@R> => While {
     span: start..end,
+    label,
     cond,
     block,
 };

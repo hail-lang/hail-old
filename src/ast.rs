@@ -516,6 +516,9 @@ pub struct While<'a> {
     /// The span of the statement.
     pub span: Span,
 
+    /// The label of the statement.
+    pub label: Option<Id<'a>>,
+
     /// The condition of the statement.
     pub cond: Expr<'a>,
 
