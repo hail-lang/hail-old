@@ -57,6 +57,25 @@ pub struct Str<'a> {
     pub value: &'a str,
 }
 
+/// A path expression.
+#[derive(Clone, Debug, PartialEq)]
+pub enum GlobalPath<'a> {
+    /// A path node.
+    Id(Id<'a>),
+
+    /// A path branch.
+    Branch {
+        /// The span of the branch.
+        span: Span,
+
+        /// The path to branch off of.
+        path: Box<GlobalPath<'a>>,
+
+        /// The name of the branch.
+        id: Id<'a>,
+    }
+}
+
 /// A compiler marker.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Marker<'a> {
@@ -660,6 +679,26 @@ pub enum Import<'a> {
     },
 }
 
+/// An application in an apply statement.
+#[derive(Clone, Debug, PartialEq)]
+pub enum Application<'a> {
+    Val(Val<'a>),
+    TypeDecl(TypeDecl<'a>),
+}
+
+/// An apply statement.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Apply<'a> {
+    /// The span of the statement.
+    pub span: Span,
+
+    /// The subject to apply to.
+    pub subject: GlobalPath<'a>,
+
+    /// The items being applied to the subject.
+    pub items: Vec<Application<'a>>,
+}
+
 /// A statement in the root of a hail unit.
 #[derive(Clone, Debug, PartialEq)]
 pub enum RootStmnt<'a> {
@@ -671,4 +710,5 @@ pub enum RootStmnt<'a> {
     While(While<'a>),
     Match(Match<'a>),
     TypeDecl(TypeDecl<'a>),
+    Apply(Apply<'a>),
 }

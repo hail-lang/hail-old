@@ -244,6 +244,9 @@ pub enum Tok<'a> {
     /// `return`
     KReturn,
 
+    /// `apply`
+    KApply,
+
     /// An identifier token.
     Id(&'a str),
 
@@ -465,6 +468,10 @@ impl<'a> Iterator for Asi<'a> {
                         "return" => {
                             self.can_insert = false;
                             Tok::KReturn
+                        },
+                        "apply" => {
+                            self.can_insert = false;
+                            Tok::KApply
                         },
                         _ => Tok::Id(slice),
                     };

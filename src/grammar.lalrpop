@@ -69,6 +69,16 @@ pub Str: Str<'input> = {
     }
 };
 
+// A path expression.
+pub GlobalPath: GlobalPath<'input> = {
+    <id:Id> => GlobalPath::Id(id),
+    <start:@L> <path:Box<GlobalPath>> "::" <id:Id> <end:@R> => GlobalPath::Branch {
+        span: start..end,
+        path,
+        id,
+    }
+};
+
 // DECLARATIONS
 
 pub Marker: Marker<'input> = <start:@L> "#" <name:Id> <end:@R> => Marker {
@@ -504,6 +514,29 @@ pub Import: Import<'input> = {
     },
 };
 
+/// An apply statement.
+pub Application: Application<'input> = {
+    <val:Val> => Application::Val(val),
+    <ty:TypeDecl> => Application::TypeDecl(ty),
+};
+
+pub Apply: Apply<'input> = <start:@L> "apply" <subject:GlobalPath> "{" <mut items:(<Application> ";")*> <last:Application?> "}" <end:@R> => {
+    let items = match last {
+        Some(last) => {
+            items.push(last);
+            items
+        },
+        _ => items,
+    };
+
+    Apply {
+        span: start..end,
+        subject,
+        items,
+    }
+};
+
+// Statements that can be found in the root of a unit.
 pub RootStmnt: RootStmnt<'input> = {
     <assign:Assign> => RootStmnt::Assign(assign),
     <val:Val> => RootStmnt::Val(val),
@@ -513,6 +546,7 @@ pub RootStmnt: RootStmnt<'input> = {
     <while_:While> => RootStmnt::While(while_),
     <match_:Match> => RootStmnt::Match(match_),
     <ty:TypeDecl> => RootStmnt::TypeDecl(ty),
+    <apply:Apply> => RootStmnt::Apply(apply),
 };
 
 pub RootStmnts: Vec<RootStmnt<'input>> = <mut items:(<RootStmnt> ";")*> <last:RootStmnt?> => match last {
@@ -597,6 +631,7 @@ extern {
         "break" => Tok::KBreak,
         "continue" => Tok::KContinue,
         "return" => Tok::KReturn,
+        "apply" => Tok::KApply,
         
         id => Tok::Id(<&'input str>),
         int => Tok::Int(<&'input str>),
