@@ -232,6 +232,9 @@ pub enum Tok<'a> {
     /// `type`
     KType,
 
+    /// `enum`
+    KEnum,
+
     /// An identifier token.
     Id(&'a str),
 
@@ -437,6 +440,10 @@ impl<'a> Iterator for Asi<'a> {
                         "type" => {
                             self.can_insert = false;
                             Tok::KType
+                        },
+                        "enum" => {
+                            self.can_insert = false;
+                            Tok::KEnum
                         },
                         _ => Tok::Id(slice),
                     };

@@ -148,6 +148,29 @@ pub struct StructType<'a> {
     pub props: Vec<StructProp<'a>>,
 }
 
+/// An enum property.
+#[derive(Clone, Debug, PartialEq)]
+pub struct EnumProp<'a> {
+    /// The location of this property.
+    pub span: Span,
+
+    /// The value of the property.
+    pub name: Id<'a>,
+
+    /// The type of this property.
+    pub ty: Option<Type<'a>>,
+}
+
+/// An enum type.
+#[derive(Clone, Debug, PartialEq)]
+pub struct EnumType<'a> {
+    /// The location of this enum.
+    pub span: Span,
+
+    /// The properties of this enum.
+    pub props: Vec<EnumProp<'a>>,
+}
+
 /// A shared type.
 #[derive(Clone, Debug, PartialEq)]
 pub struct SharedType<'a> {
@@ -208,6 +231,7 @@ pub enum Type<'a> {
     Path(PathType<'a>),
     Routine(RoutineType<'a>),
     Struct(StructType<'a>),
+    Enum(EnumType<'a>),
     Shared(SharedType<'a>),
     Fluid(FluidType<'a>),
     Ref(RefType<'a>),
@@ -327,6 +351,45 @@ pub struct Binary<'a> {
     pub right: Box<Expr<'a>>,
 }
 
+/// A property in a struct constructor.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ConstructProp<'a> {
+    /// The span of the property.
+    pub span: Span,
+
+    /// The name of the property.
+    pub name: Id<'a>,
+
+    /// The value of the property.
+    pub value: Expr<'a>,
+}
+
+/// A struct constructor.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Construct<'a> {
+    /// The span of the construct.
+    pub span: Span,
+
+    /// The name of the construct.
+    pub subject: Box<Expr<'a>>,
+
+    /// The value of the construct.
+    pub items: Vec<ConstructProp<'a>>,
+}
+
+/// An enum constructor.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ConstructEnum<'a> {
+    /// The span of the enum.
+    pub span: Span,
+
+    /// The name of the enum.
+    pub subject: Box<Expr<'a>>,
+
+    /// The properties of the enum.
+    pub item: Box<Expr<'a>>,
+}
+
 /// An expression from hail source.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expr<'a> {
@@ -341,6 +404,8 @@ pub enum Expr<'a> {
     As(As<'a>),
     Binary(Binary<'a>),
     Routine(Routine<'a>),
+    Construct(Construct<'a>),
+    ConstructEnum(ConstructEnum<'a>),
 }
 
 /// The operator of an assignment expression.

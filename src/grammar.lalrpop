@@ -109,6 +109,12 @@ pub StructProp: StructProp<'input> = <start:@L> <name:Id> "<-" <ty:Type> <end:@R
     ty,
 };
 
+pub EnumProp: EnumProp<'input> = <start:@L> <name:Id> <ty:("<-" <Type>)?> <end:@R> => EnumProp {
+    span: start..end,
+    name,
+    ty,
+};
+
 pub PrimType: Type<'input> = {
     <path:PathType> => path,
     <start:@L> "routine" "(" <args:Vec<Type>> ")" <returns:("->" <Box<Type>>)?> <end:@R> => Type::Routine(RoutineType {
@@ -120,7 +126,10 @@ pub PrimType: Type<'input> = {
         span: start..end,
         props,
     }),
-    // TODO: enum types.
+    <start:@L> "enum" "{" <props:Vec<EnumProp>> "}" <end:@R> => Type::Enum(EnumType {
+        span: start..end,
+        props,
+    }),
 };
 
 pub UnaryType: Type<'input> = {
@@ -168,6 +177,13 @@ pub Call: Call<'input> = <start:@L> <left:Box<PathExpr>> "(" <args:Vec<Expr>> ")
     args,
 };
 
+// A field in a struct constructor.
+pub ConstructProp: ConstructProp<'input> = <start:@L> <name:Id> "=" <value:Expr> <end:@R> => ConstructProp {
+    span: start..end,
+    name,
+    value,
+};
+
 // A path expression, such as `unit::MyStruct`.
 pub PathExpr: Expr<'input> = {
     <prim:PrimExpr> => prim,
@@ -180,6 +196,16 @@ pub PathExpr: Expr<'input> = {
         span: start..end,
         left,
         right: id,
+    }),
+    <start:@L> <subject:Box<PathExpr>> "::" "{" <items:Vec<ConstructProp>> "}" <end:@R> => Expr::Construct(Construct {
+        span: start..end,
+        subject,
+        items,
+    }),
+    <start:@L> <subject:Box<PathExpr>> "::" "(" <item:Box<Expr>> ")" <end:@R> => Expr::ConstructEnum(ConstructEnum {
+        span: start..end,
+        subject,
+        item,
     }),
     <call:Call> => Expr::Call(call),
     // TODO: struct constructing
@@ -334,6 +360,7 @@ pub AssignOp: AssignOp = {
     ">>=" => AssignOp::GtGtEq,
 };
 
+// TODO: make binary expressions have span data (Binary<'a>)
 // Matches any valid hail expression.
 pub Expr: Expr<'input> = { 
     <LogOrExpr>,
@@ -539,6 +566,7 @@ extern {
         "match" => Tok::KMatch,
         "struct" => Tok::KStruct,
         "type" => Tok::KType,
+        "enum" => Tok::KEnum,
         
         id => Tok::Id(<&'input str>),
         int => Tok::Int(<&'input str>),
