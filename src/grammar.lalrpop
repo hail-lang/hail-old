@@ -84,7 +84,7 @@ pub RoutineArg: RoutineArg<'input> = <start:@L> <name:Id> "<-" <ty:Type> <end:@R
 };
 
 pub Routine: Routine<'input> = 
-    <start:@L> "routine" "(" <args:Vec<RoutineArg>> ")" <returns:("<-" <Type>)?> <markers:Marker*> <block:Block> <end:@R> => Routine {
+    <start:@L> "routine" "(" <args:Vec<RoutineArg>> ")" <returns:("->" <Type>)?> <markers:Marker*> <block:Block> <end:@R> => Routine {
         span: start..end,
         args,
         returns,
@@ -430,6 +430,21 @@ pub Match: Match<'input> = <start:@L> "match" <subject:Expr> "{" <cases:Vec<Matc
     cases,
 };
 
+pub Break: Break<'input> = <start:@L> "break" <label:Id?> <end:@R> => Break {
+    span: start..end,
+    label,
+};
+
+pub Continue: Continue<'input> = <start:@L> "continue" <label:Id?> <end:@R> => Continue {
+    span: start..end,
+    label,
+};
+
+pub Return: Return<'input> = <start:@L> "return" <value:Expr?> <end:@R> => Return {
+    span: start..end,
+    value,
+};
+
 // Code blocks
 pub BlockExpr: BlockExpr<'input> = {
     <assign:Assign> => BlockExpr::Assign(assign),
@@ -439,6 +454,9 @@ pub BlockExpr: BlockExpr<'input> = {
     <while_:While> => BlockExpr::While(while_),
     <match_:Match> => BlockExpr::Match(match_),
     <ty:TypeDecl> => BlockExpr::TypeDecl(ty),
+    <br:Break> => BlockExpr::Break(br),
+    <cont:Continue> => BlockExpr::Continue(cont),
+    <ret:Return> => BlockExpr::Return(ret),
 };
 
 pub Block: Block<'input> = <start:@L> "{" <mut items:(<BlockExpr> ";")*> <last:BlockExpr?> "}" <end:@R> => match last {
@@ -568,6 +586,9 @@ extern {
         "struct" => Tok::KStruct,
         "type" => Tok::KType,
         "enum" => Tok::KEnum,
+        "break" => Tok::KBreak,
+        "continue" => Tok::KContinue,
+        "return" => Tok::KReturn,
         
         id => Tok::Id(<&'input str>),
         int => Tok::Int(<&'input str>),

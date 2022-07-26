@@ -555,6 +555,36 @@ pub struct Match<'a> {
     pub cases: Vec<MatchCase<'a>>,
 }
 
+/// A `break` statement.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Break<'a> {
+    /// The span of the statement.
+    pub span: Span,
+
+    /// The subject of the statement.
+    pub label: Option<Id<'a>>,
+}
+
+/// A `continue` statement.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Continue<'a> {
+    /// The span of the statement.
+    pub span: Span,
+
+    /// The subject of the statement.
+    pub label: Option<Id<'a>>,
+}
+
+/// A `return` statement.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Return<'a> {
+    /// The span of the statement.
+    pub span: Span,
+
+    /// The subject of the statement.
+    pub value: Option<Expr<'a>>,
+}
+
 /// An expression in a block.
 #[derive(Clone, Debug, PartialEq)]
 pub enum BlockExpr<'a> {
@@ -565,6 +595,9 @@ pub enum BlockExpr<'a> {
     While(While<'a>),
     Match(Match<'a>),
     TypeDecl(TypeDecl<'a>),
+    Break(Break<'a>),
+    Continue(Continue<'a>),
+    Return(Return<'a>),
 }
 
 /// A code block.

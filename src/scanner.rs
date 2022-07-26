@@ -235,6 +235,15 @@ pub enum Tok<'a> {
     /// `enum`
     KEnum,
 
+    /// `break`
+    KBreak,
+
+    /// `continue`
+    KContinue,
+
+    /// `return`
+    KReturn,
+
     /// An identifier token.
     Id(&'a str),
 
@@ -444,6 +453,18 @@ impl<'a> Iterator for Asi<'a> {
                         "enum" => {
                             self.can_insert = false;
                             Tok::KEnum
+                        },
+                        "break" => {
+                            self.can_insert = false;
+                            Tok::KBreak
+                        },
+                        "continue" => {
+                            self.can_insert = false;
+                            Tok::KContinue
+                        },
+                        "return" => {
+                            self.can_insert = false;
+                            Tok::KReturn
                         },
                         _ => Tok::Id(slice),
                     };
