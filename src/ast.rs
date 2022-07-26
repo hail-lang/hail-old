@@ -618,6 +618,19 @@ pub struct Return<'a> {
     pub value: Option<Expr<'a>>,
 }
 
+/// Compile time flags, for conditional compilation.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Flag<'a> {
+    /// The span of the flag.
+    pub span: Span,
+
+    /// Whether or not the flag is negative.
+    pub neg: bool,
+
+    /// The name of the flag.
+    pub name: Id<'a>,
+}
+
 /// An expression in a block.
 #[derive(Clone, Debug, PartialEq)]
 pub enum BlockExpr<'a> {
@@ -631,7 +644,7 @@ pub enum BlockExpr<'a> {
     Break(Break<'a>),
     Continue(Continue<'a>),
     Return(Return<'a>),
-    Block(Box<Block<'a>>),
+    Block(Vec<Flag<'a>>, Box<Block<'a>>),
 }
 
 /// A code block.
@@ -718,13 +731,13 @@ pub struct Apply<'a> {
 #[derive(Clone, Debug, PartialEq)]
 pub enum RootStmnt<'a> {
     Assign(Assign<'a>),
-    Val(Val<'a>),
+    Val(Vec<Flag<'a>>, Val<'a>),
     Call(Call<'a>),
-    Import(Import<'a>),
+    Import(Vec<Flag<'a>>, Import<'a>),
     If(If<'a>),
     While(While<'a>),
     Match(Match<'a>),
-    TypeDecl(TypeDecl<'a>),
-    Apply(Apply<'a>),
-    Block(Block<'a>),
+    TypeDecl(Vec<Flag<'a>>, TypeDecl<'a>),
+    Apply(Vec<Flag<'a>>, Apply<'a>),
+    Block(Vec<Flag<'a>>, Block<'a>),
 }

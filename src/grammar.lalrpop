@@ -477,6 +477,13 @@ pub Return: Return<'input> = <start:@L> "return" <value:Expr?> <end:@R> => Retur
     value,
 };
 
+// A compile time flag.
+pub Flag: Flag<'input> = <start:@L> "@" <neg:"!"?> <name:Id> ";"? <end:@R> => Flag {
+    span: start..end,
+    neg: match neg { Some(_) => true, _ => false },
+    name,
+};
+
 // Code blocks
 pub BlockExpr: BlockExpr<'input> = {
     <assign:Assign> => BlockExpr::Assign(assign),
@@ -489,7 +496,7 @@ pub BlockExpr: BlockExpr<'input> = {
     <br:Break> => BlockExpr::Break(br),
     <cont:Continue> => BlockExpr::Continue(cont),
     <ret:Return> => BlockExpr::Return(ret),
-    <block:Box<Block>> => BlockExpr::Block(block),
+    <flags:Flag*> <block:Box<Block>> => BlockExpr::Block(flags, block),
 };
 
 pub Block: Block<'input> = <start:@L> "{" <mut items:(<BlockExpr> ";")*> <last:BlockExpr?> "}" <end:@R> => match last {
@@ -556,15 +563,15 @@ pub Apply: Apply<'input> =
 // Statements that can be found in the root of a unit.
 pub RootStmnt: RootStmnt<'input> = {
     <assign:Assign> => RootStmnt::Assign(assign),
-    <val:Val> => RootStmnt::Val(val),
+    <flags:Flag*> <val:Val> => RootStmnt::Val(flags, val),
     <call:Call> => RootStmnt::Call(call),
-    <import:Import> => RootStmnt::Import(import),
+    <flags:Flag*> <import:Import> => RootStmnt::Import(flags, import),
     <if_:If> => RootStmnt::If(if_),
     <while_:While> => RootStmnt::While(while_),
     <match_:Match> => RootStmnt::Match(match_),
-    <ty:TypeDecl> => RootStmnt::TypeDecl(ty),
-    <apply:Apply> => RootStmnt::Apply(apply),
-    <block:Block> => RootStmnt::Block(block),
+    <flags:Flag*> <ty:TypeDecl> => RootStmnt::TypeDecl(flags, ty),
+    <flags:Flag*> <apply:Apply> => RootStmnt::Apply(flags, apply),
+    <flags:Flag*> <block:Block> => RootStmnt::Block(flags, block),
 };
 
 pub RootStmnts: Vec<RootStmnt<'input>> = <mut items:(<RootStmnt> ";")*> <last:RootStmnt?> => match last {
@@ -627,6 +634,7 @@ extern {
         ")" => Tok::RParen,
         "{" => Tok::LCurly,
         "}" => Tok::RCurly,
+        "@" => Tok::At,
         "," => Tok::Comma,
         ";" => Tok::Semi,
 
