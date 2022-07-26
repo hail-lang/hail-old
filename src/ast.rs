@@ -391,6 +391,19 @@ pub struct Val<'a> {
     pub value: Option<Expr<'a>>,
 }
 
+/// A type declaration.
+#[derive(Clone, Debug, PartialEq)]
+pub struct TypeDecl<'a> {
+    /// The span of the type declaration.
+    pub span: Span,
+
+    /// The name of the type declaration.
+    pub name: Id<'a>,
+
+    /// The value of the type declaration.
+    pub value: Option<Type<'a>>,
+}
+
 /// A branch after an `if` statement.
 #[derive(Clone, Debug, PartialEq)]
 pub enum IfBranch<'a> {
@@ -483,6 +496,7 @@ pub enum BlockExpr<'a> {
     If(If<'a>),
     While(While<'a>),
     Match(Match<'a>),
+    TypeDecl(TypeDecl<'a>),
 }
 
 /// A code block.
@@ -552,4 +566,5 @@ pub enum RootStmnt<'a> {
     If(If<'a>),
     While(While<'a>),
     Match(Match<'a>),
+    TypeDecl(TypeDecl<'a>),
 }

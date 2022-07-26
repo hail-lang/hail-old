@@ -354,6 +354,13 @@ pub Val: Val<'input> = <start:@L> "val" <name:Id> <ty:("<-" <Type>)?> <value:("=
     value,
 };
 
+// Type declarations
+pub TypeDecl: TypeDecl<'input> = <start:@L> "type" <name:Id> <value:("=" <Type>)?> <end:@R> => TypeDecl {
+    span: start..end,
+    name,
+    value,
+};
+
 // If statements
 pub IfBranch: IfBranch<'input> = {
     <start:@L> "else" "if" <cond:Expr> <block:Block> <end:@R> => IfBranch::ElseIf {
@@ -403,6 +410,7 @@ pub BlockExpr: BlockExpr<'input> = {
     <if_:If> => BlockExpr::If(if_),
     <while_:While> => BlockExpr::While(while_),
     <match_:Match> => BlockExpr::Match(match_),
+    <ty:TypeDecl> => BlockExpr::TypeDecl(ty),
 };
 
 pub Block: Block<'input> = <start:@L> "{" <mut items:(<BlockExpr> ";")*> <last:BlockExpr?> "}" <end:@R> => match last {
@@ -450,6 +458,7 @@ pub RootStmnt: RootStmnt<'input> = {
     <if_:If> => RootStmnt::If(if_),
     <while_:While> => RootStmnt::While(while_),
     <match_:Match> => RootStmnt::Match(match_),
+    <ty:TypeDecl> => RootStmnt::TypeDecl(ty),
 };
 
 pub RootStmnts: Vec<RootStmnt<'input>> = <mut items:(<RootStmnt> ";")*> <last:RootStmnt?> => match last {
@@ -529,6 +538,7 @@ extern {
         "while" => Tok::KWhile,
         "match" => Tok::KMatch,
         "struct" => Tok::KStruct,
+        "type" => Tok::KType,
         
         id => Tok::Id(<&'input str>),
         int => Tok::Int(<&'input str>),

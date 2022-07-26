@@ -229,6 +229,9 @@ pub enum Tok<'a> {
     /// `struct`
     KStruct,
 
+    /// `type`
+    KType,
+
     /// An identifier token.
     Id(&'a str),
 
@@ -430,6 +433,10 @@ impl<'a> Iterator for Asi<'a> {
                         "struct" => {
                             self.can_insert = false;
                             Tok::KStruct
+                        },
+                        "type" => {
+                            self.can_insert = false;
+                            Tok::KType
                         },
                         _ => Tok::Id(slice),
                     };
