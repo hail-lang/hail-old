@@ -6,7 +6,7 @@ grammar<'input>(input: &'input str);
 // MACROS
 
 // A macro for lists
-Vec<T>: Vec<T> = <mut items:(<T> ",")*> <end:T?> => match end {
+Vec<T>: Vec<T> = <mut items:(<T> ",")*> <end:T?> ";"? => match end {
     Some(end) => {
         items.push(end);
         items
@@ -103,6 +103,12 @@ pub PathType: Type<'input> = {
     }),
 };
 
+pub StructProp: StructProp<'input> = <start:@L> <name:Id> "<-" <ty:Type> <end:@R> => StructProp {
+    span: start..end,
+    name,
+    ty,
+};
+
 pub PrimType: Type<'input> = {
     <path:PathType> => path,
     <start:@L> "routine" "(" <args:Vec<Type>> ")" <returns:("->" <Box<Type>>)?> <end:@R> => Type::Routine(RoutineType {
@@ -110,9 +116,12 @@ pub PrimType: Type<'input> = {
         args,
         returns,
     }),
-    // TODO: struct types.
+    <start:@L> "struct" "{" <props:Vec<StructProp>> "}" <end:@R> => Type::Struct(StructType {
+        span: start..end,
+        props,
+    }),
     // TODO: enum types.
-}
+};
 
 pub UnaryType: Type<'input> = {
     <prim:PrimType> => prim,
@@ -372,6 +381,20 @@ pub While: While<'input> = <start:@L> "while" <cond:Expr> <block:Block> <end:@R>
     block,
 };
 
+// Match statements
+pub MatchCase: MatchCase<'input> = <start:@L> <name:Id> "<-" <ty:Type> "=>" <block:Block> <end:@R> => MatchCase {
+    span: start..end,
+    name,
+    ty,
+    block,
+};
+
+pub Match: Match<'input> = <start:@L> "match" <subject:Expr> "{" <cases:Vec<MatchCase>> "}" <end:@R> => Match {
+    span: start..end,
+    subject,
+    cases,
+};
+
 // Code blocks
 pub BlockExpr: BlockExpr<'input> = {
     <assign:Assign> => BlockExpr::Assign(assign),
@@ -379,6 +402,7 @@ pub BlockExpr: BlockExpr<'input> = {
     <call:Call> => BlockExpr::Call(call),
     <if_:If> => BlockExpr::If(if_),
     <while_:While> => BlockExpr::While(while_),
+    <match_:Match> => BlockExpr::Match(match_),
 };
 
 pub Block: Block<'input> = <start:@L> "{" <mut items:(<BlockExpr> ";")*> <last:BlockExpr?> "}" <end:@R> => match last {
@@ -425,6 +449,7 @@ pub RootStmnt: RootStmnt<'input> = {
     <import:Import> => RootStmnt::Import(import),
     <if_:If> => RootStmnt::If(if_),
     <while_:While> => RootStmnt::While(while_),
+    <match_:Match> => RootStmnt::Match(match_),
 };
 
 pub RootStmnts: Vec<RootStmnt<'input>> = <mut items:(<RootStmnt> ";")*> <last:RootStmnt?> => match last {
@@ -502,6 +527,8 @@ extern {
         "if" => Tok::KIf,
         "else" => Tok::KElse,
         "while" => Tok::KWhile,
+        "match" => Tok::KMatch,
+        "struct" => Tok::KStruct,
         
         id => Tok::Id(<&'input str>),
         int => Tok::Int(<&'input str>),

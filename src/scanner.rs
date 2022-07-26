@@ -223,6 +223,12 @@ pub enum Tok<'a> {
     /// `while`
     KWhile,
 
+    /// `match`
+    KMatch,
+
+    /// `struct`
+    KStruct,
+
     /// An identifier token.
     Id(&'a str),
 
@@ -416,6 +422,14 @@ impl<'a> Iterator for Asi<'a> {
                         "while" => {
                             self.can_insert = false;
                             Tok::KWhile
+                        },
+                        "match" => {
+                            self.can_insert = false;
+                            Tok::KMatch
+                        },
+                        "struct" => {
+                            self.can_insert = false;
+                            Tok::KStruct
                         },
                         _ => Tok::Id(slice),
                     };

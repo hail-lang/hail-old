@@ -125,6 +125,29 @@ pub struct RoutineType<'a> {
     pub returns: Option<Box<Type<'a>>>,
 }
 
+/// A struct property.
+#[derive(Clone, Debug, PartialEq)]
+pub struct StructProp<'a> {
+    /// The location of this property.
+    pub span: Span,
+
+    /// The value of the property.
+    pub name: Id<'a>,
+
+    /// The type of this property.
+    pub ty: Type<'a>,
+}
+
+/// A struct type.
+#[derive(Clone, Debug, PartialEq)]
+pub struct StructType<'a> {
+    /// The location of this struct.
+    pub span: Span,
+
+    /// The properties of this struct.
+    pub props: Vec<StructProp<'a>>,
+}
+
 /// A shared type.
 #[derive(Clone, Debug, PartialEq)]
 pub struct SharedType<'a> {
@@ -184,6 +207,7 @@ pub enum Type<'a> {
     Id(Id<'a>),
     Path(PathType<'a>),
     Routine(RoutineType<'a>),
+    Struct(StructType<'a>),
     Shared(SharedType<'a>),
     Fluid(FluidType<'a>),
     Ref(RefType<'a>),
@@ -421,6 +445,35 @@ pub struct While<'a> {
     pub block: Block<'a>,
 }
 
+/// A case in a match statement.
+#[derive(Clone, Debug, PartialEq)]
+pub struct MatchCase<'a> {
+    /// The span of the case.
+    pub span: Span,
+
+    /// The name of the case.
+    pub name: Id<'a>,
+
+    /// The type of the case.
+    pub ty: Type<'a>,
+
+    /// The block of the case.
+    pub block: Block<'a>,
+}
+
+/// A `match` statement.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Match<'a> {
+    /// The span of the statement.
+    pub span: Span,
+
+    /// The subject of the statement.
+    pub subject: Expr<'a>,
+
+    /// The cases of the statement.
+    pub cases: Vec<MatchCase<'a>>,
+}
+
 /// An expression in a block.
 #[derive(Clone, Debug, PartialEq)]
 pub enum BlockExpr<'a> {
@@ -429,6 +482,7 @@ pub enum BlockExpr<'a> {
     Call(Call<'a>),
     If(If<'a>),
     While(While<'a>),
+    Match(Match<'a>),
 }
 
 /// A code block.
@@ -497,4 +551,5 @@ pub enum RootStmnt<'a> {
     Import(Import<'a>),
     If(If<'a>),
     While(While<'a>),
+    Match(Match<'a>),
 }
