@@ -140,6 +140,20 @@ pub PrimType: Type<'input> = {
         span: start..end,
         props,
     }),
+    <start:@L> "contract" "{" <mut items:(<Application> ";")*> <last:Application?> "}" <end:@R> => {
+        let items = match last {
+            Some(last) => {
+                items.push(last);
+                items
+            },
+            _ => items,
+        };
+    
+        Type::Contract(ContractType {
+            span: start..end,
+            items,
+        })
+    }
 };
 
 pub UnaryType: Type<'input> = {
@@ -520,7 +534,8 @@ pub Application: Application<'input> = {
     <ty:TypeDecl> => Application::TypeDecl(ty),
 };
 
-pub Apply: Apply<'input> = <start:@L> "apply" <subject:GlobalPath> "{" <mut items:(<Application> ";")*> <last:Application?> "}" <end:@R> => {
+pub Apply: Apply<'input> =
+    <start:@L> "apply" <subject:GlobalPath> <to:("to" <GlobalPath>)?> "{" <mut items:(<Application> ";")*> <last:Application?> "}" <end:@R> => {
     let items = match last {
         Some(last) => {
             items.push(last);
@@ -532,6 +547,7 @@ pub Apply: Apply<'input> = <start:@L> "apply" <subject:GlobalPath> "{" <mut item
     Apply {
         span: start..end,
         subject,
+        to,
         items,
     }
 };
@@ -632,6 +648,8 @@ extern {
         "continue" => Tok::KContinue,
         "return" => Tok::KReturn,
         "apply" => Tok::KApply,
+        "contract" => Tok::KContract,
+        "to" => Tok::KTo,
         
         id => Tok::Id(<&'input str>),
         int => Tok::Int(<&'input str>),

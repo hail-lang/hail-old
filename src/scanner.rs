@@ -247,6 +247,12 @@ pub enum Tok<'a> {
     /// `apply`
     KApply,
 
+    /// `contract`
+    KContract,
+
+    /// `to`
+    KTo,
+
     /// An identifier token.
     Id(&'a str),
 
@@ -472,6 +478,14 @@ impl<'a> Iterator for Asi<'a> {
                         "apply" => {
                             self.can_insert = false;
                             Tok::KApply
+                        },
+                        "contract" => {
+                            self.can_insert = false;
+                            Tok::KContract
+                        },
+                        "to" => {
+                            self.can_insert = false;
+                            Tok::KTo
                         },
                         _ => Tok::Id(slice),
                     };

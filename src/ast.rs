@@ -190,6 +190,16 @@ pub struct EnumType<'a> {
     pub props: Vec<EnumProp<'a>>,
 }
 
+/// A contract type.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ContractType<'a> {
+    /// The location of this contract.
+    pub span: Span,
+
+    /// The properties of this contract.
+    pub items: Vec<Application<'a>>,
+}
+
 /// A shared type.
 #[derive(Clone, Debug, PartialEq)]
 pub struct SharedType<'a> {
@@ -251,6 +261,7 @@ pub enum Type<'a> {
     Routine(RoutineType<'a>),
     Struct(StructType<'a>),
     Enum(EnumType<'a>),
+    Contract(ContractType<'a>),
     Shared(SharedType<'a>),
     Fluid(FluidType<'a>),
     Ref(RefType<'a>),
@@ -692,8 +703,11 @@ pub struct Apply<'a> {
     /// The span of the statement.
     pub span: Span,
 
-    /// The subject to apply to.
+    /// The subject to apply to, or the contract being applied.
     pub subject: GlobalPath<'a>,
+
+    /// The subject to apply to.
+    pub to: Option<GlobalPath<'a>>,
 
     /// The items being applied to the subject.
     pub items: Vec<Application<'a>>,
