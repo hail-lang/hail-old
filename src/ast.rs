@@ -341,6 +341,9 @@ pub enum BinaryOp {
 /// A binary expression.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Binary<'a> {
+    /// The span of the expression.
+    pub span: Span,
+
     /// The operator of the expression.
     pub op: BinaryOp,
 

@@ -208,7 +208,6 @@ pub PathExpr: Expr<'input> = {
         item,
     }),
     <call:Call> => Expr::Call(call),
-    // TODO: struct constructing
 };
 
 // A unary expression, such as `&fluid variable`.
@@ -248,6 +247,7 @@ pub MulOp: BinaryOp = {
 pub MulExpr: Expr<'input> = {
     <as_:AsExpr> => as_,
     <start:@L> <left:Box<MulExpr>> <op:MulOp> <right:Box<AsExpr>> <end:@R> => Expr::Binary(Binary {
+        span: start..end,
         op,
         left,
         right,
@@ -262,6 +262,7 @@ pub AddOp: BinaryOp = {
 pub AddExpr: Expr<'input> = {
     <mul:MulExpr> => mul,
     <start:@L> <left:Box<AddExpr>> <op:AddOp> <right:Box<MulExpr>> <end:@R> => Expr::Binary(Binary {
+        span: start..end,
         op,
         left,
         right,
@@ -276,6 +277,7 @@ pub ShiftOp: BinaryOp = {
 pub ShiftExpr: Expr<'input> = {
     <add:AddExpr> => add,
     <start:@L> <left:Box<ShiftExpr>> <op:ShiftOp> <right:Box<AddExpr>> <end:@R> => Expr::Binary(Binary {
+        span: start..end,
         op,
         left,
         right,
@@ -285,6 +287,7 @@ pub ShiftExpr: Expr<'input> = {
 pub BitAndExpr: Expr<'input> = {
     <shift:ShiftExpr> => shift,
     <start:@L> <left:Box<BitAndExpr>> "&" <right:Box<ShiftExpr>> <end:@R> => Expr::Binary(Binary {
+        span: start..end,
         op: BinaryOp::Amp,
         left,
         right,
@@ -294,6 +297,7 @@ pub BitAndExpr: Expr<'input> = {
 pub BitXorExpr: Expr<'input> = {
     <and:BitAndExpr> => and,
     <start:@L> <left:Box<BitXorExpr>> "^" <right:Box<BitAndExpr>> <end:@R> => Expr::Binary(Binary {
+        span: start..end,
         op: BinaryOp::Caret,
         left,
         right,
@@ -303,6 +307,7 @@ pub BitXorExpr: Expr<'input> = {
 pub BitOrExpr: Expr<'input> = {
     <xor:BitXorExpr> => xor,
     <start:@L> <left:Box<BitOrExpr>> "|" <right:Box<BitXorExpr>> <end:@R> => Expr::Binary(Binary {
+        span: start..end,
         op: BinaryOp::Pipe,
         left,
         right,
@@ -320,7 +325,8 @@ pub CompOp: BinaryOp = {
 
 pub CompExpr: Expr<'input> = {
     <or:BitOrExpr> => or,
-    <start:@L> <left:Box<CompExpr>> <op:CompOp> <right:Box<BitOrExpr>> => Expr::Binary(Binary {
+    <start:@L> <left:Box<CompExpr>> <op:CompOp> <right:Box<BitOrExpr>> <end:@R> => Expr::Binary(Binary {
+        span: start..end,
         op,
         left,
         right,
@@ -330,6 +336,7 @@ pub CompExpr: Expr<'input> = {
 pub LogAndExpr: Expr<'input> = {
     <comp:CompExpr> => comp,
     <start:@L> <left:Box<LogAndExpr>> "&&" <right:Box<CompExpr>> <end:@R> => Expr::Binary(Binary {
+        span: start..end,
         op: BinaryOp::AmpAmp,
         left,
         right,
@@ -339,6 +346,7 @@ pub LogAndExpr: Expr<'input> = {
 pub LogOrExpr: Expr<'input> = {
     <and:LogAndExpr> => and,
     <start:@L> <left:Box<LogOrExpr>> "||" <right:Box<LogAndExpr>> <end:@R> => Expr::Binary(Binary {
+        span: start..end,
         op: BinaryOp::PipePipe,
         left,
         right,
