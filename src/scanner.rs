@@ -214,6 +214,12 @@ pub enum Tok<'a> {
     /// `from`
     KFrom,
 
+    /// `if`
+    KIf,
+
+    /// `else`
+    KElse,
+
     /// An identifier token.
     Id(&'a str),
 
@@ -395,6 +401,14 @@ impl<'a> Iterator for Asi<'a> {
                         "from" => {
                             self.can_insert = false;
                             Tok::KFrom
+                        },
+                        "if" => {
+                            self.can_insert = false;
+                            Tok::KIf
+                        },
+                        "else" => {
+                            self.can_insert = false;
+                            Tok::KElse
                         },
                         _ => Tok::Id(slice),
                     };

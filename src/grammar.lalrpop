@@ -110,6 +110,8 @@ pub PrimType: Type<'input> = {
         args,
         returns,
     }),
+    // TODO: struct types.
+    // TODO: enum types.
 }
 
 pub UnaryType: Type<'input> = {
@@ -335,6 +337,7 @@ pub Assign: Assign<'input> = <start:@L> <left:PrimExpr> <op:AssignOp> <right:Exp
     right,
 };
 
+// Val statements/variable declarations.
 pub Val: Val<'input> = <start:@L> "val" <name:Id> <ty:("<-" <Type>)?> <value:("=" <Expr>)?> <end:@R> => Val {
     span: start..end,
     name,
@@ -342,10 +345,32 @@ pub Val: Val<'input> = <start:@L> "val" <name:Id> <ty:("<-" <Type>)?> <value:("=
     value,
 };
 
+// If statements
+pub IfBranch: IfBranch<'input> = {
+    <start:@L> "else" "if" <cond:Expr> <block:Block> <end:@R> => IfBranch::ElseIf {
+        span: start..end,
+        cond,
+        block,
+    },
+    <start:@L> "else" <block:Block> <end:@R> => IfBranch::Else {
+        span: start..end,
+        block,
+    },
+};
+
+pub If: If<'input> = <start:@L> "if" <cond:Expr> <block:Block> <branches:IfBranch*> <end:@R> => If {
+    span: start..end,
+    cond,
+    block,
+    branches,
+};
+
+// Code blocks
 pub BlockExpr: BlockExpr<'input> = {
     <assign:Assign> => BlockExpr::Assign(assign),
     <val:Val> => BlockExpr::Val(val),
     <call:Call> => BlockExpr::Call(call),
+    <if_:If> => BlockExpr::If(if_),
 };
 
 pub Block: Block<'input> = <start:@L> "{" <mut items:(<BlockExpr> ";")*> <last:BlockExpr?> "}" <end:@R> => match last {
@@ -390,6 +415,7 @@ pub RootStmnt: RootStmnt<'input> = {
     <val:Val> => RootStmnt::Val(val),
     <call:Call> => RootStmnt::Call(call),
     <import:Import> => RootStmnt::Import(import),
+    <if_:If> => RootStmnt::If(if_),
 };
 
 pub RootStmnts: Vec<RootStmnt<'input>> = <mut items:(<RootStmnt> ";")*> <last:RootStmnt?> => match last {
@@ -464,6 +490,8 @@ extern {
         "shared" => Tok::KShared,
         "import" => Tok::KImport,
         "from" => Tok::KFrom,
+        "if" => Tok::KIf,
+        "else" => Tok::KElse,
         
         id => Tok::Id(<&'input str>),
         int => Tok::Int(<&'input str>),

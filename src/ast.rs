@@ -367,12 +367,54 @@ pub struct Val<'a> {
     pub value: Option<Expr<'a>>,
 }
 
+/// A branch after an `if` statement.
+#[derive(Clone, Debug, PartialEq)]
+pub enum IfBranch<'a> {
+    /// An `else if` statement.
+    ElseIf {
+        /// The span of the `if` branch.
+        span: Span,
+
+        /// The condition of the `if` branch.
+        cond: Expr<'a>,
+
+        /// The block of the `if` branch.
+        block: Block<'a>,
+    },
+
+    /// An `else` statement.
+    Else {
+        /// The span of the `if` branch.
+        span: Span,
+
+        /// The block of the `if` branch.
+        block: Block<'a>,
+    },
+}
+
+/// An `if` statement.
+#[derive(Clone, Debug, PartialEq)]
+pub struct If<'a> {
+    /// The span of the statement.
+    pub span: Span,
+
+    /// The condition of the statement.
+    pub cond: Expr<'a>,
+
+    /// The block of the statement.
+    pub block: Block<'a>,
+
+    /// The branches of the statement.
+    pub branches: Vec<IfBranch<'a>>,
+}
+
 /// An expression in a block.
 #[derive(Clone, Debug, PartialEq)]
 pub enum BlockExpr<'a> {
     Assign(Assign<'a>),
     Val(Val<'a>),
     Call(Call<'a>),
+    If(If<'a>),
 }
 
 /// A code block.
@@ -439,4 +481,5 @@ pub enum RootStmnt<'a> {
     Val(Val<'a>),
     Call(Call<'a>),
     Import(Import<'a>),
+    If(If<'a>),
 }
