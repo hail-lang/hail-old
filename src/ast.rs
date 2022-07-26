@@ -408,6 +408,19 @@ pub struct If<'a> {
     pub branches: Vec<IfBranch<'a>>,
 }
 
+/// A `while` statement.
+#[derive(Clone, Debug, PartialEq)]
+pub struct While<'a> {
+    /// The span of the statement.
+    pub span: Span,
+
+    /// The condition of the statement.
+    pub cond: Expr<'a>,
+
+    /// The block of the statement.
+    pub block: Block<'a>,
+}
+
 /// An expression in a block.
 #[derive(Clone, Debug, PartialEq)]
 pub enum BlockExpr<'a> {
@@ -415,6 +428,7 @@ pub enum BlockExpr<'a> {
     Val(Val<'a>),
     Call(Call<'a>),
     If(If<'a>),
+    While(While<'a>),
 }
 
 /// A code block.
@@ -482,4 +496,5 @@ pub enum RootStmnt<'a> {
     Call(Call<'a>),
     Import(Import<'a>),
     If(If<'a>),
+    While(While<'a>),
 }

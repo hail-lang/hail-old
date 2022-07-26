@@ -365,12 +365,20 @@ pub If: If<'input> = <start:@L> "if" <cond:Expr> <block:Block> <branches:IfBranc
     branches,
 };
 
+// While statements
+pub While: While<'input> = <start:@L> "while" <cond:Expr> <block:Block> <end:@R> => While {
+    span: start..end,
+    cond,
+    block,
+};
+
 // Code blocks
 pub BlockExpr: BlockExpr<'input> = {
     <assign:Assign> => BlockExpr::Assign(assign),
     <val:Val> => BlockExpr::Val(val),
     <call:Call> => BlockExpr::Call(call),
     <if_:If> => BlockExpr::If(if_),
+    <while_:While> => BlockExpr::While(while_),
 };
 
 pub Block: Block<'input> = <start:@L> "{" <mut items:(<BlockExpr> ";")*> <last:BlockExpr?> "}" <end:@R> => match last {
@@ -416,6 +424,7 @@ pub RootStmnt: RootStmnt<'input> = {
     <call:Call> => RootStmnt::Call(call),
     <import:Import> => RootStmnt::Import(import),
     <if_:If> => RootStmnt::If(if_),
+    <while_:While> => RootStmnt::While(while_),
 };
 
 pub RootStmnts: Vec<RootStmnt<'input>> = <mut items:(<RootStmnt> ";")*> <last:RootStmnt?> => match last {
@@ -492,6 +501,7 @@ extern {
         "from" => Tok::KFrom,
         "if" => Tok::KIf,
         "else" => Tok::KElse,
+        "while" => Tok::KWhile,
         
         id => Tok::Id(<&'input str>),
         int => Tok::Int(<&'input str>),

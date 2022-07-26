@@ -220,6 +220,9 @@ pub enum Tok<'a> {
     /// `else`
     KElse,
 
+    /// `while`
+    KWhile,
+
     /// An identifier token.
     Id(&'a str),
 
@@ -409,6 +412,10 @@ impl<'a> Iterator for Asi<'a> {
                         "else" => {
                             self.can_insert = false;
                             Tok::KElse
+                        },
+                        "while" => {
+                            self.can_insert = false;
+                            Tok::KWhile
                         },
                         _ => Tok::Id(slice),
                     };
