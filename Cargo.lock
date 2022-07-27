@@ -185,10 +185,17 @@ name = "hail"
 version = "0.0.0-alpha"
 dependencies = [
  "clap",
+ "hail-parser",
+ "target-lexicon",
+]
+
+[[package]]
+name = "hail-parser"
+version = "0.0.0-alpha"
+dependencies = [
  "lalrpop",
  "lalrpop-util",
  "logos",
- "target-lexicon",
 ]
 
 [[package]]

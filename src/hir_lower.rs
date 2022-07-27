@@ -1,6 +1,6 @@
 //! Toolkit for lowering a hail AST to hail HIR.
 
-use crate::ast;
+use hail_parser::ast;
 
 /// A unit being lowered from AST to HIR.
 pub struct HirLowerUnit<'a> {
@@ -35,12 +35,14 @@ fn hir_lower_imports<'a>(ctx: &mut HirLowerContext, unit: &HirLowerUnit<'a>) {
                         if flag.neg {
                             continue;
                         }
-                        
+
                         continue 'imports;
                     }
                 }
-
+                
                 println!("IMPORT!!");
+
+
             },
             _ => {},
         }

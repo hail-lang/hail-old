@@ -1,14 +1,9 @@
 // TODO: array types & array values
 
-pub mod ast;
 pub mod hir_lower;
-pub mod scanner;
 
 use clap::{Parser, Subcommand};
-use lalrpop_util::lalrpop_mod;
 use target_lexicon::Triple;
-
-lalrpop_mod!(pub grammar);
 
 #[derive(Clone, Debug, Subcommand)]
 enum Command {
@@ -45,6 +40,8 @@ struct Args {
     command: Command,
 }
 
+// TODO: load flags for different targets
+
 fn main() -> Result<(), ()> {
     let args = Args::parse();
 
@@ -61,8 +58,8 @@ fn main() -> Result<(), ()> {
 
             let ast = {
                 let start = std::time::Instant::now();
-                let parser = grammar::RootStmntsParser::new();
-                let ast = parser.parse(source, scanner::Asi::lex(source)).unwrap();
+                let parser = hail_parser::grammar::RootStmntsParser::new();
+                let ast = parser.parse(source, hail_parser::scanner::Asi::lex(source)).unwrap();
                 let end = start.elapsed();
     
                 //dbg!(ast);
