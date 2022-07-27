@@ -10,6 +10,7 @@ build = "build.rs"
 clap = { version = "3.2.14", features = ["derive"] }
 lalrpop-util = "0.19.8"
 logos = "0.12.1"
+target-lexicon = "0.12.4"
 
 [build-dependencies]
 lalrpop = "0.19.8"
